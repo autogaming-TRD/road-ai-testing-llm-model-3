@@ -125,8 +125,8 @@ input[type=number]:focus{border-color:#4ade80}
     <span class="snum" style="background:#1e3a5f;color:#3b82f6">AI</span>
     Diagnosis &amp; Cost Report
   </div>
-  <div class="result-box" id="resultBox">
-    <span class="placeholder">Select a damage type, enter width and length, then click Analyze. The AI will generate a full repair report and cost estimate.</span>
+  <div id="resultBox" style="background:#0f172a;border:2px solid #1e293b;border-radius:12px;padding:20px;font-size:.91rem;line-height:1.85;color:#94a3b8;word-break:break-word;transition:border-color .35s;width:100%;box-sizing:border-box;">
+    <span style="color:#334155;font-style:italic">Select a damage type, enter width and length, then click Analyze. The AI will generate a full repair report and cost estimate.</span>
   </div>
   <div class="status-row">
     <div class="dot" id="dot"></div>
@@ -265,7 +265,7 @@ async function analyze() {
   var userMsg = 'Road Damage Report:\n- Damage Type: ' + dmgType + '\n- Width: ' + w + ' m\n- Length: ' + l + ' m\n- Total Damaged Area: ' + area + ' m²\n\nPlease analyze this damage and provide the full repair report and cost estimate.';
 
   btn.disabled = true;
-  box.className = 'result-box loading';
+  box.style.borderColor = '#f59e0b'; box.style.color = '#94a3b8';
   box.innerHTML = '<span class="spinner"></span>Analyzing damage — please wait...';
   setStatus(true, 'Sending to Gemini AI...');
 
@@ -305,14 +305,16 @@ async function analyze() {
 
     if (!text) throw new Error('Empty response from Gemini. Response: ' + JSON.stringify(data).slice(0,200));
 
-    box.className = 'result-box done';
-    // Convert line breaks to visible HTML and display full report
+    box.style.borderColor = '#22c55e';
+    box.style.color = '#e2e8f0';
+    // Convert newlines to <br> for full display
     box.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
     setStatus(true, 'Analysis complete');
 
   } catch (err) {
-    box.className = 'result-box error';
-    box.textContent = 'Error: ' + err.message + '\n\nTroubleshooting:\n• Go to aistudio.google.com/apikey and create a BRAND NEW key\n• Paste the new key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome\n• Make sure your internet connection is working';
+    box.style.borderColor = '#ef4444';
+    box.style.color = '#fca5a5';
+    box.innerHTML = ('Error: ' + err.message + '\n\nTroubleshooting:\n• Go to aistudio.google.com/apikey and create a BRAND NEW key\n• Paste the new key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome\n• Make sure your internet connection is working').replace(/\n/g,'<br>');
     setStatus(false, 'Error — see message above');
   } finally {
     btn.disabled = false;
