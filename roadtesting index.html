@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concrete Road Repair Cost App</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container {
+    background: #2b2b2b;
+    padding: 25px;
+    border-radius: 12px;
+    width: 420px;
+}
+.damage-buttons button {
+    width: 48%;
+    padding: 10px;
+    margin: 5px 1%;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #444;
+    color: white;
+    font-weight: bold;
+}
+.damage-buttons button.active { background: #00b894; }
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #3a3a3a;
+    color: white;
+}
+textarea { height: 120px; resize: none; }
+
+.submit-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    background: #0984e3;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+}
+.status { margin-top: 10px; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Concrete Road Repair Cost</h2>
+
+    <label>Damage Type</label>
+    <div class="damage-buttons">
+        <button type="button" id="potholeBtn" onclick="selectDamage('pothole')">Pothole</button>
+        <button type="button" id="crackBtn" onclick="selectDamage('crack')">Crack</button>
+    </div>
+
+    <label>Width (m)</label>
+    <input type="number" id="width">
+
+    <label>Length (m)</label>
+    <input type="number" id="length">
+
+    <label>LLM Generated Instructions & Cost</label>
+    <textarea id="llmText"></textarea>
+
+    <button class="submit-btn" onclick="submitForm()">Send to Make</button>
+    <div class="status" id="status"></div>
+</div>
+
+<!-- Hidden form (this avoids 401 + CORS problems) -->
+<form id="webhookForm"
+      action="https://hook.eu1.make.com/sbjf9y4zrp4i9ofkpy2hy4je4iayyb13"
+      method="POST"
+      target="hiddenFrame">
+    <input type="hidden" name="damage_type" id="f_damage">
+    <input type="hidden" name="width" id="f_width">
+    <input type="hidden" name="length" id="f_length">
+    <input type="hidden" name="llm_output" id="f_llm">
+</form>
+
+<iframe name="hiddenFrame" style="display:none;"></iframe>
+
+<script>
+let selectedDamage = "";
+
+function selectDamage(type) {
+    selectedDamage = type;
+    document.getElementById("potholeBtn").classList.remove("active");
+    document.getElementById("crackBtn").classList.remove("active");
+    document.getElementById(type + "Btn").classList.add("active");
+}
+
+function submitForm() {
+    if (!selectedDamage) {
+        alert("Please select damage type");
+        return;
+    }
+
+    document.getElementById("f_damage").value = selectedDamage;
+    document.getElementById("f_width").value =
+        document.getElementById("width").value;
+    document.getElementById("f_length").value =
+        document.getElementById("length").value;
+    document.getElementById("f_llm").value =
+        document.getElementById("llmText").value;
+
+    document.getElementById("webhookForm").submit();
+    document.getElementById("status").innerText = "✅ Sent successfully!";
+}
+</script>
+
+</body>
+</html>
