@@ -1,130 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Concrete Road Repair Cost App</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: #1e1e1e;
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-.container {
-    background: #2b2b2b;
-    padding: 25px;
-    border-radius: 12px;
-    width: 420px;
-}
-.damage-buttons button {
-    width: 48%;
-    padding: 10px;
-    margin: 5px 1%;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background: #444;
-    color: white;
-    font-weight: bold;
-}
-.damage-buttons button.active { background: #00b894; }
+    <title>Concrete Road Repair Cost Calculator</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 40px;
+        }
 
-input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 8px;
-    border: none;
-    background: #3a3a3a;
-    color: white;
-}
-textarea { height: 120px; resize: none; }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
-.submit-btn {
-    margin-top: 15px;
-    width: 100%;
-    padding: 12px;
-    background: #0984e3;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: bold;
-    color: white;
-}
-.status { margin-top: 10px; text-align: center; }
-</style>
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select, textarea, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            color: green;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Concrete Road Repair Cost</h2>
+    <h2>Concrete Road Repair Cost Calculator</h2>
 
-    <label>Damage Type</label>
-    <div class="damage-buttons">
-        <button type="button" id="potholeBtn" onclick="selectDamage('pothole')">Pothole</button>
-        <button type="button" id="crackBtn" onclick="selectDamage('crack')">Crack</button>
-    </div>
+    <label for="damageType">Select Damage Type</label>
+    <select id="damageType">
+        <option value="pothole">Pothole</option>
+        <option value="crack">Crack</option>
+    </select>
 
-    <label>Width (m)</label>
-    <input type="number" id="width">
+    <label for="width">Width (meters)</label>
+    <input type="number" id="width" placeholder="Enter width" required>
 
-    <label>Length (m)</label>
-    <input type="number" id="length">
+    <label for="length">Length (meters)</label>
+    <input type="number" id="length" placeholder="Enter length" required>
 
-    <label>LLM Generated Instructions & Cost</label>
-    <textarea id="llmText"></textarea>
+    <label for="llmText">LLM Generated Explanation</label>
+    <textarea id="llmText" rows="4" placeholder="LLM will generate explanation here..."></textarea>
 
-    <button class="submit-btn" onclick="submitForm()">Send to Make</button>
-    <div class="status" id="status"></div>
+    <button onclick="calculateAndSend()">Calculate & Send</button>
+
+    <div class="result" id="result"></div>
 </div>
 
-<!-- Hidden form (this avoids 401 + CORS problems) -->
-<form id="webhookForm"
-      action="https://hook.eu1.make.com/893vrmyc2cy3lnr6poid5cz2us9r1cq8"
-      method="POST"
-      target="hiddenFrame">
-    <input type="hidden" name="damage_type" id="f_damage">
-    <input type="hidden" name="width" id="f_width">
-    <input type="hidden" name="length" id="f_length">
-    <input type="hidden" name="llm_output" id="f_llm">
-</form>
-
-<iframe name="hiddenFrame" style="display:none;"></iframe>
-
 <script>
-let selectedDamage = "";
+function calculateAndSend() {
 
-function selectDamage(type) {
-    selectedDamage = type;
-    document.getElementById("potholeBtn").classList.remove("active");
-    document.getElementById("crackBtn").classList.remove("active");
-    document.getElementById(type + "Btn").classList.add("active");
-}
+    const damageType = document.getElementById("damageType").value;
+    const width = parseFloat(document.getElementById("width").value);
+    const length = parseFloat(document.getElementById("length").value);
+    const llmText = document.getElementById("llmText").value;
 
-function submitForm() {
-    if (!selectedDamage) {
-        alert("Please select damage type");
+    if (!width || !length) {
+        alert("Please enter width and length.");
         return;
     }
 
-    document.getElementById("f_damage").value = selectedDamage;
-    document.getElementById("f_width").value =
-        document.getElementById("width").value;
-    document.getElementById("f_length").value =
-        document.getElementById("length").value;
-    document.getElementById("f_llm").value =
-        document.getElementById("llmText").value;
+    const area = width * length;
 
-    document.getElementById("webhookForm").submit();
-    document.getElementById("status").innerText = "✅ Sent successfully!";
+    // Example cost logic
+    let ratePerSqm = 0;
+
+    if (damageType === "pothole") {
+        ratePerSqm = 50;  // adjust as needed
+    } else if (damageType === "crack") {
+        ratePerSqm = 30;  // adjust as needed
+    }
+
+    const totalCost = area * ratePerSqm;
+
+    document.getElementById("result").innerText =
+        "Estimated Cost: $" + totalCost.toFixed(2);
+
+    // Send data to Make.com webhook
+    fetch("https://hook.eu1.make.com/893vrmyc2cy3lnr6poid5cz2us9r1cq8", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            damageType: damageType,
+            width: width,
+            length: length,
+            area: area,
+            ratePerSqm: ratePerSqm,
+            totalCost: totalCost,
+            llmGeneratedText: llmText,
+            timestamp: new Date().toISOString()
+        })
+    })
+    .then(response => {
+        console.log("Sent to Make.com");
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
 }
 </script>
 
 </body>
-
 </html>
