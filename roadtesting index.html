@@ -272,7 +272,7 @@ async function analyze() {
   try {
     // Merge system prompt + user message into one text (most compatible approach)
     var fullPrompt = SYSTEM_PROMPT + '\n\n' + userMsg;
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + key;
 
     var resp = await fetch(url, {
       method: 'POST',
