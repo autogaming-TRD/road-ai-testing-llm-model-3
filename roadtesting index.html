@@ -1,459 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Road Repair Cost Calculator</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0b0f1a;
-      --surface: #131929;
-      --surface2: #1a2236;
-      --border: #253047;
-      --accent: #f59e0b;
-      --accent2: #ef4444;
-      --green: #22c55e;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --subtle: #94a3b8;
-    }
-
-    body {
-      font-family: 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 32px 16px 60px;
-    }
-
-    .wrap { max-width: 740px; margin: 0 auto; }
-
-    /* Header */
-    .header { text-align: center; margin-bottom: 36px; }
-    .header .badge {
-      display: inline-block;
-      background: rgba(245,158,11,0.15);
-      border: 1px solid rgba(245,158,11,0.3);
-      color: var(--accent);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 14px;
-    }
-    .header h1 {
-      font-size: 2.1rem; font-weight: 800;
-      background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-      line-height: 1.2;
-    }
-    .header p { color: var(--subtle); margin-top: 10px; font-size: 0.95rem; line-height: 1.6; }
-
-    /* API Key setup card */
-    .setup-card {
-      background: var(--surface);
-      border: 1px solid rgba(245,158,11,0.25);
-      border-radius: 16px;
-      padding: 20px 24px;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .setup-icon { font-size: 1.6rem; flex-shrink: 0; }
-    .setup-body { flex: 1; }
-    .setup-body p { font-size: 0.82rem; color: var(--subtle); margin-top: 3px; }
-    .setup-body strong { color: var(--text); font-size: 0.92rem; }
-    .key-row { display: flex; gap: 8px; margin-top: 10px; }
-    .key-input {
-      flex: 1; background: var(--bg);
-      border: 1.5px solid var(--border); border-radius: 8px;
-      padding: 9px 12px; color: var(--text); font-size: 0.88rem;
-      outline: none; font-family: monospace;
-    }
-    .key-input:focus { border-color: var(--accent); }
-    .save-btn {
-      padding: 9px 18px; background: var(--accent);
-      border: none; border-radius: 8px; color: #000;
-      font-weight: 700; font-size: 0.85rem; cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .save-btn:hover { opacity: 0.85; }
-    .key-status { font-size: 0.78rem; margin-top: 6px; }
-    .key-status.ok { color: var(--green); }
-    .key-status.err { color: var(--accent2); }
-
-    /* Cards */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 20px;
-    }
-    .card-title {
-      font-size: 0.82rem; font-weight: 700; letter-spacing: 1px;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 16px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .card-title::before { content: ''; display: block; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
-
-    /* Type selector */
-    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .type-btn {
-      background: var(--surface2); border: 2px solid var(--border);
-      border-radius: 12px; padding: 18px 14px; cursor: pointer;
-      transition: all 0.18s; text-align: center; color: var(--subtle);
-      position: relative; overflow: hidden;
-    }
-    .type-btn::after {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(135deg, rgba(245,158,11,0.07), transparent);
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .type-btn:hover { border-color: var(--accent); color: var(--text); }
-    .type-btn:hover::after { opacity: 1; }
-    .type-btn.active { border-color: var(--accent); color: var(--text); background: rgba(245,158,11,0.08); }
-    .type-btn.active::after { opacity: 1; }
-    .type-btn .check {
-      position: absolute; top: 10px; right: 10px;
-      width: 18px; height: 18px; border-radius: 50%;
-      background: var(--accent); display: none;
-      align-items: center; justify-content: center;
-      font-size: 10px; color: #000; font-weight: 700;
-    }
-    .type-btn.active .check { display: flex; }
-    .type-emoji { font-size: 2.2rem; display: block; margin-bottom: 10px; }
-    .type-label { font-weight: 700; font-size: 1rem; display: block; }
-    .type-desc { font-size: 0.75rem; color: var(--muted); margin-top: 5px; line-height: 1.4; }
-    .type-btn.active .type-desc { color: var(--subtle); }
-
-    /* Inputs */
-    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .field { display: flex; flex-direction: column; gap: 7px; }
-    .field label { font-size: 0.82rem; font-weight: 600; color: var(--subtle); }
-    .input-wrap { position: relative; }
-    .field input {
-      width: 100%; background: var(--surface2);
-      border: 1.5px solid var(--border); border-radius: 10px;
-      padding: 12px 48px 12px 14px; color: var(--text);
-      font-size: 1rem; outline: none; transition: border-color 0.2s;
-    }
-    .field input:focus { border-color: var(--accent); }
-    .field-unit {
-      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-      font-size: 0.78rem; color: var(--muted); font-weight: 600;
-      pointer-events: none;
-    }
-    .area-preview {
-      margin-top: 14px; padding: 12px 16px;
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; display: flex; align-items: center; gap: 10px;
-    }
-    .area-preview .label { font-size: 0.82rem; color: var(--muted); }
-    .area-preview .value { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-left: auto; }
-
-    /* Prompt preview */
-    .prompt-box {
-      background: var(--surface2); border: 1px solid var(--border);
-      border-radius: 10px; padding: 14px;
-      font-size: 0.82rem; color: var(--muted); line-height: 1.7;
-      font-family: monospace;
-    }
-    .prompt-box span { color: var(--accent); }
-
-    /* Submit */
-    .submit-btn {
-      width: 100%; padding: 17px;
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
-      border: none; border-radius: 12px; color: #fff;
-      font-size: 1.05rem; font-weight: 800; cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: 0.3px; display: flex; align-items: center;
-      justify-content: center; gap: 10px;
-    }
-    .submit-btn:hover { opacity: 0.88; }
-    .submit-btn:active { transform: scale(0.985); }
-    .submit-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-
-    /* Result */
-    .result-card {
-      background: var(--surface); border: 2px solid var(--border);
-      border-radius: 16px; padding: 24px; margin-top: 20px;
-      transition: border-color 0.3s;
-    }
-    .result-card.loading { border-color: var(--accent); }
-    .result-card.done { border-color: var(--green); }
-    .result-card.error { border-color: var(--accent2); }
-
-    .result-header {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 16px; padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
-    }
-    .result-header .title { font-weight: 700; font-size: 0.95rem; }
-    .result-header .pill {
-      margin-left: auto; padding: 3px 10px; border-radius: 20px;
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.5px;
-    }
-    .pill.idle { background: rgba(100,116,139,0.2); color: var(--muted); }
-    .pill.loading { background: rgba(245,158,11,0.2); color: var(--accent); }
-    .pill.done { background: rgba(34,197,94,0.2); color: var(--green); }
-    .pill.error { background: rgba(239,68,68,0.2); color: var(--accent2); }
-
-    .result-body {
-      min-height: 120px; font-size: 0.93rem; line-height: 1.8;
-      color: var(--subtle); white-space: pre-wrap;
-    }
-    .result-body.has-content { color: var(--text); }
-    .placeholder-text { color: var(--muted); font-style: italic; }
-
-    .typing-dots span {
-      display: inline-block; width: 6px; height: 6px;
-      border-radius: 50%; background: var(--accent); margin: 0 2px;
-      animation: blink 1.2s infinite;
-    }
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
-
-    @media (max-width: 520px) {
-      .type-grid, .input-row { grid-template-columns: 1fr; }
-      .header h1 { font-size: 1.6rem; }
-      .setup-card { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Road Repair Cost Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:40px 20px}
+.container{max-width:760px;margin:0 auto}
+h1{text-align:center;font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,#f59e0b,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.subtitle{text-align:center;color:#64748b;margin-bottom:32px;font-size:.95rem}
+.banner{background:#1a1a2e;border:1px solid rgba(245,158,11,.35);border-radius:14px;padding:22px;margin-bottom:24px}
+.banner h3{color:#f59e0b;font-size:.95rem;margin-bottom:6px}
+.banner p{font-size:.82rem;color:#94a3b8;line-height:1.6;margin-bottom:12px}
+.banner a{color:#f59e0b;text-decoration:none}
+.key-row{display:flex;gap:10px;flex-wrap:wrap}
+.key-input{flex:1;min-width:200px;background:#0f172a;border:1.5px solid #334155;border-radius:9px;padding:10px 14px;color:#f8fafc;font-size:.9rem;outline:none;font-family:monospace;transition:border-color .2s}
+.key-input:focus{border-color:#f59e0b}
+.key-btn{padding:10px 20px;background:#f59e0b;border:none;border-radius:9px;color:#0f172a;font-weight:700;cursor:pointer;font-size:.88rem;white-space:nowrap}
+.key-btn:hover{background:#fbbf24}
+.key-status{font-size:.8rem;margin-top:8px;color:#f59e0b}
+.key-status.ok{color:#22c55e}
+.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:26px;margin-bottom:20px}
+.card-title{font-size:.92rem;font-weight:700;color:#f8fafc;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.step-num{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.type-btn{background:#0f172a;border:2px solid #334155;border-radius:12px;padding:22px 16px;cursor:pointer;text-align:center;color:#94a3b8;transition:all .2s}
+.type-btn:hover{border-color:rgba(245,158,11,.5);background:rgba(245,158,11,.04)}
+.type-btn.active{border-color:#f59e0b;background:rgba(245,158,11,.09);color:#f8fafc}
+.type-btn b{display:block;font-size:1.08rem;margin-bottom:6px;color:#f8fafc}
+.type-btn small{font-size:.75rem;color:#64748b;line-height:1.4;display:block}
+.type-btn.active small{color:#94a3b8}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ig{display:flex;flex-direction:column;gap:7px}
+label{font-size:.84rem;font-weight:600;color:#94a3b8}
+input[type=number]{background:#0f172a;border:2px solid #334155;border-radius:10px;padding:11px 14px;color:#f8fafc;font-size:1rem;outline:none;transition:border-color .2s;width:100%}
+input[type=number]:focus{border-color:#f59e0b}
+.unit{font-size:.75rem;color:#475569}
+.card-desc{font-size:.82rem;color:#64748b;line-height:1.6;margin-bottom:14px}
+textarea{width:100%;min-height:170px;background:#0f172a;border:2px solid #334155;border-radius:10px;padding:13px 14px;color:#e2e8f0;font-size:.85rem;font-family:inherit;outline:none;resize:vertical;line-height:1.65;transition:border-color .2s}
+textarea:focus{border-color:#f59e0b}
+.tip{font-size:.78rem;color:#475569;margin-top:9px;line-height:1.55}
+.tip span{color:#f59e0b}
+.sub-btn{width:100%;padding:16px;background:linear-gradient(135deg,#f59e0b,#ef4444);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .2s,transform .1s;letter-spacing:.2px}
+.sub-btn:hover{opacity:.9}
+.sub-btn:active{transform:scale(.99)}
+.sub-btn:disabled{opacity:.4;cursor:not-allowed}
+.result-wrap{margin-top:22px}
+.result-box{background:#0f172a;border:2px solid #1e293b;border-radius:12px;padding:22px;min-height:170px;font-size:.92rem;line-height:1.85;color:#94a3b8;white-space:pre-wrap;word-break:break-word;transition:border-color .35s}
+.result-box.loading{border-color:#f59e0b}
+.result-box.done{border-color:#22c55e;color:#e2e8f0}
+.result-box.error{border-color:#ef4444;color:#fca5a5}
+.placeholder{color:#334155;font-style:italic}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid #f59e0b;border-top-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:middle;margin-right:9px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-row{display:flex;align-items:center;gap:8px;font-size:.79rem;color:#475569;margin-top:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:#334155;flex-shrink:0}
+.dot.on{background:#22c55e;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media(max-width:500px){.type-grid,.input-grid{grid-template-columns:1fr}h1{font-size:1.45rem}}
+</style>
 </head>
 <body>
-<div class="wrap">
+<div class="container">
 
-  <div class="header">
-    <div class="badge">🛣️ Road Inspector Pro</div>
-    <h1>Concrete Road Repair<br>Cost Calculator</h1>
-    <p>AI-powered damage analysis & cost estimation using ChatGPT</p>
+<h1>Road Repair Cost Calculator</h1>
+<p class="subtitle">AI-powered concrete road damage diagnosis and cost estimation</p>
+
+<!-- API Key -->
+<div class="banner">
+  <h3>🔑 OpenAI API Key</h3>
+  <p>
+    Your key is saved only in your browser tab — sent directly to OpenAI, never anywhere else.
+    This replaces Make.com entirely with no CORS errors.<br>
+    Get a free key at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a>
+  </p>
+  <div class="key-row">
+    <input class="key-input" id="apiKey" type="password" placeholder="sk-proj-..." autocomplete="off"/>
+    <button class="key-btn" onclick="saveKey()">Save Key</button>
   </div>
-
-  <!-- API Key Setup -->
-  <div class="setup-card">
-    <div class="setup-icon">🔑</div>
-    <div class="setup-body">
-      <strong>OpenAI API Key Required</strong>
-      <p>Your key is used directly in-browser and never stored on any server.</p>
-      <div class="key-row">
-        <input type="password" class="key-input" id="apiKeyInput" placeholder="sk-..." />
-        <button class="save-btn" onclick="saveKey()">Save</button>
-      </div>
-      <div class="key-status" id="keyStatus"></div>
-    </div>
-  </div>
-
-  <!-- Damage Type -->
-  <div class="card">
-    <div class="card-title">Select Damage Type</div>
-    <div class="type-grid">
-      <button class="type-btn" id="btn-pothole" onclick="selectType('pothole')">
-        <div class="check">✓</div>
-        <span class="type-emoji">🕳️</span>
-        <span class="type-label">Pothole</span>
-        <span class="type-desc">Bowl-shaped cavity or depression formed in road surface</span>
-      </button>
-      <button class="type-btn" id="btn-crack" onclick="selectType('crack')">
-        <div class="check">✓</div>
-        <span class="type-emoji">〰️</span>
-        <span class="type-label">Crack</span>
-        <span class="type-desc">Linear or branching fracture on concrete surface</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Measurements -->
-  <div class="card">
-    <div class="card-title">Damage Measurements</div>
-    <div class="input-row">
-      <div class="field">
-        <label for="width">Width</label>
-        <div class="input-wrap">
-          <input type="number" id="width" placeholder="0.00" min="0" step="0.01" oninput="updateArea()" />
-          <span class="field-unit">m</span>
-        </div>
-      </div>
-      <div class="field">
-        <label for="length">Length</label>
-        <div class="input-wrap">
-          <input type="number" id="length" placeholder="0.00" min="0" step="0.01" oninput="updateArea()" />
-          <span class="field-unit">m</span>
-        </div>
-      </div>
-    </div>
-    <div class="area-preview">
-      <span class="label">📐 Calculated Area</span>
-      <span class="value" id="areaDisplay">— m²</span>
-    </div>
-  </div>
-
-  <!-- Prompt Preview -->
-  <div class="card">
-    <div class="card-title">Prompt Preview (sent to ChatGPT)</div>
-    <div class="prompt-box" id="promptPreview">
-      Fill in the form above to see the generated prompt...
-    </div>
-  </div>
-
-  <!-- Submit -->
-  <button class="submit-btn" id="submitBtn" onclick="analyze()">
-    <span>⚡</span> Analyze Damage & Calculate Cost
-  </button>
-
-  <!-- Result -->
-  <div class="result-card" id="resultCard">
-    <div class="result-header">
-      <span>🤖</span>
-      <span class="result-title">AI Analysis & Cost Report</span>
-      <span class="pill idle" id="statusPill">Waiting</span>
-    </div>
-    <div class="result-body" id="resultBody">
-      <span class="placeholder-text">Submit the form to receive your AI-powered damage diagnosis and cost estimate.</span>
-    </div>
-  </div>
-
+  <div class="key-status" id="keyStatus">No API key entered yet</div>
 </div>
 
+<!-- Step 1: Damage Type -->
+<div class="card">
+  <div class="card-title">
+    <span class="step-num" style="background:#1e3a5f;color:#60a5fa">1</span>
+    Select Damage Type
+  </div>
+  <div class="type-grid">
+    <button class="type-btn" id="btn-pothole" onclick="pick('pothole')">
+      <b>🕳️ Pothole</b>
+      <small>Cavity or depression in road surface caused by water infiltration and traffic load</small>
+    </button>
+    <button class="type-btn" id="btn-crack" onclick="pick('crack')">
+      <b>〰️ Crack</b>
+      <small>Linear fracture or fissure running through the concrete road surface</small>
+    </button>
+  </div>
+</div>
+
+<!-- Step 2: Measurements -->
+<div class="card">
+  <div class="card-title">
+    <span class="step-num" style="background:#1a2e1a;color:#4ade80">2</span>
+    Damage Measurements
+  </div>
+  <div class="input-grid">
+    <div class="ig">
+      <label>Width</label>
+      <input type="number" id="width" placeholder="e.g. 0.5" min="0.01" step="0.01"/>
+      <span class="unit">meters (m)</span>
+    </div>
+    <div class="ig">
+      <label>Length</label>
+      <input type="number" id="length" placeholder="e.g. 3.0" min="0.01" step="0.01"/>
+      <span class="unit">meters (m)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3: Training Prompt -->
+<div class="card">
+  <div class="card-title">
+    <span class="step-num" style="background:#2d1b69;color:#c4b5fd">3</span>
+    AI Training Instructions
+  </div>
+  <p class="card-desc">
+    This is your "training document" — ChatGPT reads this before every analysis.
+    Edit it with your real repair rates, materials, and company procedures.
+    When your document is ready, just paste its content here.
+  </p>
+  <textarea id="sysPrompt">You are a professional concrete road repair engineer and cost estimator working in Thailand. When given a road damage report, always respond in these exact sections:
+
+🔎 DAMAGE ASSESSMENT
+Evaluate severity as Minor, Moderate, or Severe based on the total damaged area (width × length in m²).
+
+🔧 RECOMMENDED REPAIR METHOD
+Provide a step-by-step repair procedure suited to this damage type and severity level.
+
+💰 ESTIMATED COST BREAKDOWN
+Itemize costs for: materials, labor, equipment rental, and any traffic control measures (in Thai Baht, THB).
+
+⏱ ESTIMATED COMPLETION TIME
+State how long the repair will realistically take.
+
+⚠️ ADDITIONAL NOTES
+Flag any risks, urgency factors, or follow-up maintenance needed.
+
+--- COST REFERENCE GUIDE ---
+Pothole repair:
+  Minor (area < 0.5 m²): 800–1,200 THB/m²
+  Moderate (0.5–2 m²): 1,500–2,500 THB/m²
+  Severe (> 2 m²): 3,000–5,000 THB/m²
+
+Crack repair:
+  Minor (< 2 m long): 150–300 THB/linear meter
+  Moderate (2–10 m long): 400–700 THB/linear meter
+  Severe (> 10 m or wide crack): 1,000–2,000 THB/m² (full resurface)
+
+Always end your response with:
+💵 TOTAL ESTIMATED COST: [low range] – [high range] THB</textarea>
+  <p class="tip">💡 <span>Tip:</span> When you finish writing your repair document, replace this text with your actual rates, materials list, and procedures. The AI will follow your document exactly.</p>
+</div>
+
+<!-- Submit -->
+<button class="sub-btn" id="submitBtn" onclick="analyze()">⚡ Analyze Damage &amp; Calculate Cost</button>
+
+<!-- Result -->
+<div class="result-wrap card">
+  <div class="card-title">
+    <span class="step-num" style="background:#0f172a;border:1px solid #334155;color:#94a3b8">AI</span>
+    Diagnosis &amp; Cost Report
+  </div>
+  <div class="result-box" id="resultBox">
+    <span class="placeholder">Complete the form above and click Analyze. ChatGPT will return a full damage report and cost estimate following your training instructions.</span>
+  </div>
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span id="statusTxt">Ready</span>
+  </div>
+</div>
+
+</div><!-- /container -->
+
 <script>
-  let selectedType = null;
-  let apiKey = '';
+var picked = null;
 
-  function saveKey() {
-    const val = document.getElementById('apiKeyInput').value.trim();
-    const status = document.getElementById('keyStatus');
-    if (!val.startsWith('sk-')) {
-      status.className = 'key-status err';
-      status.textContent = '✗ Invalid key format. Should start with sk-';
-      return;
-    }
-    apiKey = val;
-    status.className = 'key-status ok';
-    status.textContent = '✓ API key saved for this session';
+window.onload = function() {
+  var k = sessionStorage.getItem('oai_key');
+  if (k) {
+    document.getElementById('apiKey').value = k;
+    document.getElementById('keyStatus').textContent = 'API key loaded for this session';
+    document.getElementById('keyStatus').className = 'key-status ok';
   }
+};
 
-  function selectType(type) {
-    selectedType = type;
-    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('btn-' + type).classList.add('active');
-    updatePrompt();
+function saveKey() {
+  var k = document.getElementById('apiKey').value.trim();
+  if (!k.startsWith('sk-')) {
+    document.getElementById('keyStatus').textContent = 'Invalid key — must start with sk-';
+    document.getElementById('keyStatus').className = 'key-status';
+    return;
   }
+  sessionStorage.setItem('oai_key', k);
+  document.getElementById('keyStatus').textContent = 'API key saved for this session ✓';
+  document.getElementById('keyStatus').className = 'key-status ok';
+}
 
-  function updateArea() {
-    const w = parseFloat(document.getElementById('width').value) || 0;
-    const l = parseFloat(document.getElementById('length').value) || 0;
-    const area = (w * l).toFixed(2);
-    document.getElementById('areaDisplay').textContent = (w && l) ? area + ' m²' : '— m²';
-    updatePrompt();
+function pick(type) {
+  picked = type;
+  document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('btn-' + type).classList.add('active');
+}
+
+function setStatus(on, txt) {
+  document.getElementById('dot').className = 'dot' + (on ? ' on' : '');
+  document.getElementById('statusTxt').textContent = txt;
+}
+
+async function analyze() {
+  var key  = document.getElementById('apiKey').value.trim();
+  var w    = parseFloat(document.getElementById('width').value);
+  var l    = parseFloat(document.getElementById('length').value);
+  var sys  = document.getElementById('sysPrompt').value.trim();
+  var box  = document.getElementById('resultBox');
+  var btn  = document.getElementById('submitBtn');
+
+  if (!key || !key.startsWith('sk-')) { alert('Please enter and save a valid OpenAI API key first.'); return; }
+  if (!picked) { alert('Please select a damage type: Pothole or Crack.'); return; }
+  if (!w || !l || w <= 0 || l <= 0) { alert('Please enter valid width and length values greater than 0.'); return; }
+
+  var area = (w * l).toFixed(2);
+  var dmgType = picked.charAt(0).toUpperCase() + picked.slice(1);
+  var userMsg = 'Road Damage Report\n- Damage Type: ' + dmgType + '\n- Width: ' + w + ' m\n- Length: ' + l + ' m\n- Total Area: ' + area + ' m²\n\nPlease provide the full damage assessment, recommended repair method, and detailed cost estimate.';
+
+  btn.disabled = true;
+  box.className = 'result-box loading';
+  box.innerHTML = '<span class="spinner"></span>Sending to ChatGPT — analyzing damage...';
+  setStatus(true, 'Connecting to OpenAI...');
+
+  try {
+    var resp = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: sys },
+          { role: 'user',   content: userMsg }
+        ],
+        max_tokens: 1200,
+        temperature: 0.25
+      })
+    });
+
+    var data = await resp.json();
+    if (!resp.ok) throw new Error(data.error ? data.error.message : 'HTTP ' + resp.status);
+
+    var text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (!text) throw new Error('No content returned from ChatGPT');
+
+    box.className = 'result-box done';
+    box.textContent = text;
+    var tok = data.usage ? data.usage.total_tokens : '?';
+    setStatus(true, 'Analysis complete — ' + tok + ' tokens used');
+
+  } catch (err) {
+    box.className = 'result-box error';
+    box.textContent = 'Error: ' + err.message + '\n\nCommon fixes:\n• Make sure your API key is correct and starts with sk-\n• Check that your OpenAI account has available credits (platform.openai.com/usage)\n• Re-enter your key and click Save Key, then try again';
+    setStatus(false, 'Error — see details above');
+  } finally {
+    btn.disabled = false;
   }
-
-  function updatePrompt() {
-    const w = document.getElementById('width').value;
-    const l = document.getElementById('length').value;
-    const area = (parseFloat(w)||0) * (parseFloat(l)||0);
-    const type = selectedType || '[not selected]';
-
-    const preview = document.getElementById('promptPreview');
-    if (!selectedType && !w && !l) {
-      preview.textContent = 'Fill in the form above to see the generated prompt...';
-      return;
-    }
-    preview.innerHTML = `You are a civil engineering expert specializing in concrete road repair.\n\nA road inspector has identified the following damage:\n- <span>Damage Type:</span> ${type.toUpperCase()}\n- <span>Width:</span> ${w || '?'} meters\n- <span>Length:</span> ${l || '?'} meters\n- <span>Affected Area:</span> ${area.toFixed(2)} m²\n\nPlease provide:\n1. Damage diagnosis and severity assessment\n2. Recommended repair method and materials\n3. Step-by-step repair instructions\n4. Estimated cost breakdown (labor + materials)\n5. Estimated total cost in USD\n6. Preventive recommendations`;
-  }
-
-  function buildPrompt() {
-    const w = document.getElementById('width').value;
-    const l = document.getElementById('length').value;
-    const area = ((parseFloat(w)||0) * (parseFloat(l)||0)).toFixed(2);
-
-    return `You are a civil engineering expert specializing in concrete road repair.
-
-A road inspector has identified the following damage:
-- Damage Type: ${selectedType.toUpperCase()}
-- Width: ${w} meters
-- Length: ${l} meters
-- Affected Area: ${area} m²
-
-Please provide a detailed report including:
-1. Damage diagnosis and severity assessment based on the dimensions
-2. Recommended repair method and required materials
-3. Step-by-step repair instructions
-4. Estimated cost breakdown (labor + materials separately)
-5. Total estimated repair cost in USD
-6. Timeline for the repair work
-7. Preventive recommendations to avoid future damage
-
-Format your response clearly with headers for each section.`;
-  }
-
-  function setPill(state, text) {
-    const pill = document.getElementById('statusPill');
-    pill.className = 'pill ' + state;
-    pill.textContent = text;
-  }
-
-  async function analyze() {
-    if (!apiKey) { alert('Please enter and save your OpenAI API key first.'); return; }
-    if (!selectedType) { alert('Please select a damage type.'); return; }
-    const w = document.getElementById('width').value;
-    const l = document.getElementById('length').value;
-    if (!w || !l || parseFloat(w) <= 0 || parseFloat(l) <= 0) {
-      alert('Please enter valid width and length values.'); return;
-    }
-
-    const card = document.getElementById('resultCard');
-    const body = document.getElementById('resultBody');
-    const btn = document.getElementById('submitBtn');
-
-    btn.disabled = true;
-    card.className = 'result-card loading';
-    setPill('loading', 'Analyzing...');
-    body.className = 'result-body';
-    body.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div> ChatGPT is analyzing the damage...';
-
-    try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + apiKey
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o',
-          messages: [{ role: 'user', content: buildPrompt() }],
-          temperature: 0.4,
-          max_tokens: 1500
-        })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'API error ' + response.status);
-      }
-
-      const result = data.choices[0].message.content;
-      card.className = 'result-card done';
-      setPill('done', '✓ Complete');
-      body.className = 'result-body has-content';
-      body.textContent = result;
-
-    } catch (err) {
-      card.className = 'result-card error';
-      setPill('error', 'Error');
-      body.className = 'result-body';
-      body.textContent = '❌ ' + err.message;
-    } finally {
-      btn.disabled = false;
-    }
-  }
+}
 </script>
 </body>
 </html>
