@@ -1,24 +1,152 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head><meta charset="utf-8"><title>Repair Form — POST to Make</title></head>
-  <body>
-    <h2>Concrete Repair (form POST)</h2>
-    <form action="https://hook.eu1.make.com/893vrmyc2cy3lnr6poid5cz2us9r1cq8" method="POST">
-      <label>Damage type
-        <select name="damageType">
-          <option value="pothole">pothole</option>
-          <option value="crack">crack</option>
-        </select>
-      </label>
-      <br>
-      <label>Width (m) <input type="number" name="width" step="0.01" required></label>
-      <br>
-      <label>Length (m) <input type="number" name="length" step="0.01" required></label>
-      <br>
-      <label>LLM text <textarea name="llmText"></textarea></label>
-      <br>
-      <input type="submit" value="Send to Make">
-    </form>
-    <p>Note: open your browser DevTools → Network before submitting to inspect the POST request.</p>
-  </body>
+<head>
+  <meta charset="utf-8" />
+  <title>Concrete Road Repair — Webhook Tester</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:24px}
+    .card{max-width:720px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    label{display:block;margin-top:12px;font-weight:600}
+    input,select,textarea,button{width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid #ccc;font-size:14px}
+    .small{width:48%;display:inline-block}
+    .small + .small{margin-left:4%}
+    pre{background:#0f1724;color:#cbd5e1;padding:12px;border-radius:6px;overflow:auto}
+    .hint{font-size:13px;color:#555;margin-top:6px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Concrete Road Repair — Webhook Tester</h2>
+
+    <label>Webhook URL</label>
+    <input id="webhookUrl" value="https://hook.eu1.make.com/893vrmyc2cy3lnr6poid5cz2us9r1cq8">
+
+    <label>Damage type</label>
+    <select id="damageType"><option value="pothole">pothole</option><option value="crack">crack</option></select>
+
+    <div style="display:flex;gap:8px;">
+      <div class="small">
+        <label>Width (m)</label>
+        <input id="width" type="number" value="2">
+      </div>
+      <div class="small">
+        <label>Length (m)</label>
+        <input id="length" type="number" value="3">
+      </div>
+    </div>
+
+    <label>LLM text (optional)</label>
+    <textarea id="llmText" rows="3">Example LLM text</textarea>
+
+    <label>Content type</label>
+    <select id="contentType">
+      <option value="application/json">application/json</option>
+      <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
+    </select>
+
+    <label>Authentication method</label>
+    <select id="authType">
+      <option value="none">None</option>
+      <option value="header">Header (e.g. Authorization: Bearer ...)</option>
+      <option value="query">Query param (e.g. ?api_key=...)</option>
+      <option value="body">Include in request body</option>
+    </select>
+
+    <div id="authFields" style="margin-top:8px;">
+      <label>Auth key name</label>
+      <input id="authKeyName" placeholder="e.g. Authorization or api_key" value="Authorization">
+      <label>Auth key value</label>
+      <input id="authKeyValue" placeholder="e.g. Bearer abc123 or abc123">
+      <div class="hint">If using Header, set <strong>Auth key name</strong> to <code>Authorization</code> and value to <code>Bearer YOUR_TOKEN</code>.</div>
+    </div>
+
+    <button id="sendBtn" style="margin-top:14px">Send to webhook</button>
+
+    <div style="margin-top:14px">
+      <strong>Response status:</strong> <span id="status">—</span>
+      <div style="margin-top:8px"><strong>Response body / error:</strong>
+        <pre id="response">—</pre>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const urlInput = document.getElementById('webhookUrl').value.trim();
+  const damageType = document.getElementById('damageType').value;
+  const width = parseFloat(document.getElementById('width').value) || 0;
+  const length = parseFloat(document.getElementById('length').value) || 0;
+  const llmText = document.getElementById('llmText').value;
+  const contentType = document.getElementById('contentType').value;
+  const authType = document.getElementById('authType').value;
+  const authKeyName = document.getElementById('authKeyName').value.trim();
+  const authKeyValue = document.getElementById('authKeyValue').value.trim();
+
+  const area = width * length;
+  const ratePerSqm = damageType === 'pothole' ? 50 : 30;
+  const totalCost = area * ratePerSqm;
+
+  let bodyObj = {
+    damageType, width, length, area, ratePerSqm, totalCost, llmGeneratedText: llmText, timestamp: new Date().toISOString()
+  };
+
+  // If authType is 'body', insert auth into payload
+  if (authType === 'body' && authKeyName) {
+    bodyObj[authKeyName] = authKeyValue;
+  }
+
+  let finalUrl = urlInput;
+  if (authType === 'query' && authKeyName) {
+    // append as query param (careful if url already has params)
+    const sep = finalUrl.includes('?') ? '&' : '?';
+    finalUrl = finalUrl + sep + encodeURIComponent(authKeyName) + '=' + encodeURIComponent(authKeyValue);
+  }
+
+  let headers = {};
+  let body;
+  if (contentType === 'application/json') {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify(bodyObj);
+  } else {
+    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+    const params = new URLSearchParams();
+    for (const [k,v] of Object.entries(bodyObj)) params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+    body = params.toString();
+  }
+
+  // If authType is header, add header
+  if (authType === 'header' && authKeyName) {
+    headers[authKeyName] = authKeyValue;
+  }
+
+  // show spinner / disable
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Sending...';
+
+  try {
+    const resp = await fetch(finalUrl, {
+      method: 'POST',
+      headers,
+      body
+    });
+
+    const text = await resp.text();
+    document.getElementById('status').innerText = resp.status + ' ' + resp.statusText;
+    document.getElementById('response').innerText = text || '(empty response)';
+
+    if (resp.status === 401) {
+      // helpful tips
+      document.getElementById('response').innerText += "\n\nTIP: 401 = Unauthorized. Check (1) exact webhook URL, (2) whether Make scenario expects a header or query param, and (3) if the webhook is active. Avoid storing secrets in client-side code.";
+    }
+  } catch (err) {
+    document.getElementById('status').innerText = 'Network/Error';
+    document.getElementById('response').innerText = err.toString();
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send to webhook';
+  }
+});
+</script>
+</body>
 </html>
