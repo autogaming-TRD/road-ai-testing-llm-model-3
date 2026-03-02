@@ -240,7 +240,7 @@ async function analyze() {
   setStatus(true, 'Sending to Gemini AI...');
 
   try {
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key;
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + key;
 
     var resp = await fetch(url, {
       method: 'POST',
