@@ -1,153 +1,213 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Concrete Road Repair — Webhook Tester</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Concrete Road Repair Cost Calculator</title>
   <style>
-    body{font-family:Arial,Helvetica,sans-serif;background:#f4f6f8;padding:24px}
-    .card{max-width:720px;margin:0 auto;background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
-    label{display:block;margin-top:12px;font-weight:600}
-    input,select,textarea,button{width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid #ccc;font-size:14px}
-    .small{width:48%;display:inline-block}
-    .small + .small{margin-left:4%}
-    pre{background:#0f1724;color:#cbd5e1;padding:12px;border-radius:6px;overflow:auto}
-    .hint{font-size:13px;color:#555;margin-top:6px}
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+    .container { max-width: 720px; margin: 0 auto; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 {
+      font-size: 2rem; font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .header p { color: #94a3b8; margin-top: 8px; font-size: 0.95rem; }
+    .card {
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 16px; padding: 28px; margin-bottom: 24px;
+    }
+    .card h2 {
+      font-size: 1rem; font-weight: 600; color: #f8fafc;
+      margin-bottom: 18px; display: flex; align-items: center; gap: 8px;
+    }
+    .card h2 .icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+    }
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .type-btn {
+      background: #0f172a; border: 2px solid #334155;
+      border-radius: 12px; padding: 20px 16px; cursor: pointer;
+      transition: all 0.2s; text-align: center; color: #94a3b8;
+    }
+    .type-btn:hover { border-color: #f59e0b; color: #f8fafc; }
+    .type-btn.active { border-color: #f59e0b; background: rgba(245,158,11,0.1); color: #f8fafc; }
+    .type-btn .emoji { font-size: 2rem; display: block; margin-bottom: 8px; }
+    .type-btn .label { font-weight: 600; font-size: 1rem; }
+    .type-btn .desc { font-size: 0.78rem; color: #64748b; margin-top: 4px; }
+    .type-btn.active .desc { color: #94a3b8; }
+    .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .input-group { display: flex; flex-direction: column; gap: 8px; }
+    label { font-size: 0.85rem; font-weight: 500; color: #94a3b8; }
+    input[type="number"] {
+      background: #0f172a; border: 2px solid #334155;
+      border-radius: 10px; padding: 12px 14px; color: #f8fafc;
+      font-size: 1rem; width: 100%; transition: border-color 0.2s; outline: none;
+    }
+    input[type="number"]:focus { border-color: #f59e0b; }
+    .unit { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
+    .submit-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      border: none; border-radius: 12px; color: white;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.5px;
+    }
+    .submit-btn:hover { opacity: 0.9; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .result-box {
+      background: #0f172a; border: 2px solid #334155;
+      border-radius: 12px; padding: 20px; min-height: 140px;
+      font-size: 0.95rem; line-height: 1.7; color: #94a3b8;
+      white-space: pre-wrap; transition: border-color 0.3s;
+    }
+    .result-box.loading { border-color: #f59e0b; }
+    .result-box.has-content { border-color: #22c55e; color: #e2e8f0; }
+    .result-box.error { border-color: #ef4444; color: #fca5a5; }
+    .placeholder { color: #475569; font-style: italic; }
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2px solid #f59e0b; border-top-color: transparent;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #64748b; margin-top: 10px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; }
+    .dot.active { background: #22c55e; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    @media (max-width: 520px) { .type-grid, .input-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Concrete Road Repair — Webhook Tester</h2>
+  <div class="container">
+    <div class="header">
+      <h1>🛣️ Road Repair Cost Calculator</h1>
+      <p>Estimate concrete road repair costs using AI-powered analysis</p>
+    </div>
 
-    <label>Webhook URL</label>
-    <input id="webhookUrl" value="https://hook.eu1.make.com/pu5xkuja7dmsos4bv156w2siwi6f3p6o">
-
-    <label>Damage type</label>
-    <select id="damageType"><option value="pothole">pothole</option><option value="crack">crack</option></select>
-
-    <div style="display:flex;gap:8px;">
-      <div class="small">
-        <label>Width (m)</label>
-        <input id="width" type="number" value="2">
-      </div>
-      <div class="small">
-        <label>Length (m)</label>
-        <input id="length" type="number" value="3">
+    <div class="card">
+      <h2><span class="icon" style="background:#1e3a5f;">🔍</span> Select Damage Type</h2>
+      <div class="type-grid">
+        <button class="type-btn" id="btn-pothole" onclick="selectType('pothole')">
+          <span class="emoji">🕳️</span>
+          <span class="label">Pothole</span>
+          <span class="desc">Cavity or depression in road surface</span>
+        </button>
+        <button class="type-btn" id="btn-crack" onclick="selectType('crack')">
+          <span class="emoji">〰️</span>
+          <span class="label">Crack</span>
+          <span class="desc">Linear fracture on road surface</span>
+        </button>
       </div>
     </div>
 
-    <label>LLM text (optional)</label>
-    <textarea id="llmText" rows="3">Example LLM text</textarea>
-
-    <label>Content type</label>
-    <select id="contentType">
-      <option value="application/json">application/json</option>
-      <option value="application/x-www-form-urlencoded">application/x-www-form-urlencoded</option>
-    </select>
-
-    <label>Authentication method</label>
-    <select id="authType">
-      <option value="none">None</option>
-      <option value="header">Header (e.g. Authorization: Bearer ...)</option>
-      <option value="query">Query param (e.g. ?api_key=...)</option>
-      <option value="body">Include in request body</option>
-    </select>
-
-    <div id="authFields" style="margin-top:8px;">
-      <label>Auth key name</label>
-      <input id="authKeyName" placeholder="e.g. Authorization or api_key" value="Authorization">
-      <label>Auth key value</label>
-      <input id="authKeyValue" placeholder="e.g. Bearer abc123 or abc123">
-      <div class="hint">If using Header, set <strong>Auth key name</strong> to <code>Authorization</code> and value to <code>Bearer YOUR_TOKEN</code>.</div>
+    <div class="card">
+      <h2><span class="icon" style="background:#1e3a2f;">📏</span> Damage Measurements</h2>
+      <div class="input-grid">
+        <div class="input-group">
+          <label for="width">Width</label>
+          <input type="number" id="width" placeholder="e.g. 2.5" min="0" step="0.01" />
+          <span class="unit">meters (m)</span>
+        </div>
+        <div class="input-group">
+          <label for="length">Length</label>
+          <input type="number" id="length" placeholder="e.g. 5.0" min="0" step="0.01" />
+          <span class="unit">meters (m)</span>
+        </div>
+      </div>
     </div>
 
-    <button id="sendBtn" style="margin-top:14px">Send to webhook</button>
+    <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+      ⚡ Calculate Repair Cost
+    </button>
 
-    <div style="margin-top:14px">
-      <strong>Response status:</strong> <span id="status">—</span>
-      <div style="margin-top:8px"><strong>Response body / error:</strong>
-        <pre id="response">—</pre>
+    <div class="card" style="margin-top:24px;">
+      <h2><span class="icon" style="background:#2d1b69;">🤖</span> AI Cost Analysis</h2>
+      <div class="result-box" id="resultBox">
+        <span class="placeholder">Your AI-generated cost analysis will appear here after you submit...</span>
+      </div>
+      <div class="status-bar">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Ready</span>
       </div>
     </div>
   </div>
 
-<script>
-document.getElementById('sendBtn').addEventListener('click', async () => {
-  const urlInput = document.getElementById('webhookUrl').value.trim();
-  const damageType = document.getElementById('damageType').value;
-  const width = parseFloat(document.getElementById('width').value) || 0;
-  const length = parseFloat(document.getElementById('length').value) || 0;
-  const llmText = document.getElementById('llmText').value;
-  const contentType = document.getElementById('contentType').value;
-  const authType = document.getElementById('authType').value;
-  const authKeyName = document.getElementById('authKeyName').value.trim();
-  const authKeyValue = document.getElementById('authKeyValue').value.trim();
+  <script>
+    let selectedType = null;
 
-  const area = width * length;
-  const ratePerSqm = damageType === 'pothole' ? 50 : 30;
-  const totalCost = area * ratePerSqm;
-
-  let bodyObj = {
-    damageType, width, length, area, ratePerSqm, totalCost, llmGeneratedText: llmText, timestamp: new Date().toISOString()
-  };
-
-  // If authType is 'body', insert auth into payload
-  if (authType === 'body' && authKeyName) {
-    bodyObj[authKeyName] = authKeyValue;
-  }
-
-  let finalUrl = urlInput;
-  if (authType === 'query' && authKeyName) {
-    // append as query param (careful if url already has params)
-    const sep = finalUrl.includes('?') ? '&' : '?';
-    finalUrl = finalUrl + sep + encodeURIComponent(authKeyName) + '=' + encodeURIComponent(authKeyValue);
-  }
-
-  let headers = {};
-  let body;
-  if (contentType === 'application/json') {
-    headers['Content-Type'] = 'application/json';
-    body = JSON.stringify(bodyObj);
-  } else {
-    headers['Content-Type'] = 'application/x-www-form-urlencoded';
-    const params = new URLSearchParams();
-    for (const [k,v] of Object.entries(bodyObj)) params.append(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
-    body = params.toString();
-  }
-
-  // If authType is header, add header
-  if (authType === 'header' && authKeyName) {
-    headers[authKeyName] = authKeyValue;
-  }
-
-  // show spinner / disable
-  const sendBtn = document.getElementById('sendBtn');
-  sendBtn.disabled = true;
-  sendBtn.textContent = 'Sending...';
-
-  try {
-    const resp = await fetch(finalUrl, {
-      method: 'POST',
-      headers,
-      body
-    });
-
-    const text = await resp.text();
-    document.getElementById('status').innerText = resp.status + ' ' + resp.statusText;
-    document.getElementById('response').innerText = text || '(empty response)';
-
-    if (resp.status === 401) {
-      // helpful tips
-      document.getElementById('response').innerText += "\n\nTIP: 401 = Unauthorized. Check (1) exact webhook URL, (2) whether Make scenario expects a header or query param, and (3) if the webhook is active. Avoid storing secrets in client-side code.";
+    function selectType(type) {
+      selectedType = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + type).classList.add('active');
     }
-  } catch (err) {
-    document.getElementById('status').innerText = 'Network/Error';
-    document.getElementById('response').innerText = err.toString();
-  } finally {
-    sendBtn.disabled = false;
-    sendBtn.textContent = 'Send to webhook';
-  }
-});
-</script>
+
+    function setStatus(state, text) {
+      document.getElementById('statusDot').className = 'dot' + (state === 'active' ? ' active' : '');
+      document.getElementById('statusText').textContent = text;
+    }
+
+    async function submitForm() {
+      const width = document.getElementById('width').value;
+      const length = document.getElementById('length').value;
+      const resultBox = document.getElementById('resultBox');
+      const submitBtn = document.getElementById('submitBtn');
+
+      if (!selectedType) { alert('Please select a damage type.'); return; }
+      if (!width || !length || parseFloat(width) <= 0 || parseFloat(length) <= 0) {
+        alert('Please enter valid width and length values.'); return;
+      }
+
+      const payload = {
+        damage_type: selectedType,
+        width: parseFloat(width),
+        length: parseFloat(length),
+        area: parseFloat((parseFloat(width) * parseFloat(length)).toFixed(2)),
+        timestamp: new Date().toISOString()
+      };
+
+      submitBtn.disabled = true;
+      resultBox.className = 'result-box loading';
+      resultBox.innerHTML = '<span class="spinner"></span> Sending data and waiting for AI analysis...';
+      setStatus('active', 'Connecting to webhook...');
+
+      try {
+        const response = await fetch('https://hook.eu1.make.com/893vrmyc2cy3lnr6poid5cz2us9r1cq8', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const text = await response.text();
+
+        if (response.ok) {
+          resultBox.className = 'result-box has-content';
+          resultBox.textContent = text || '✅ Request sent successfully.';
+          setStatus('active', 'Analysis complete');
+        } else {
+          resultBox.className = 'result-box error';
+          resultBox.textContent = '❌ Error ' + response.status + ': ' + text;
+          setStatus('', 'Error occurred');
+        }
+      } catch (err) {
+        resultBox.className = 'result-box error';
+        resultBox.textContent = '❌ Failed to connect to webhook.\n\nError: ' + err.message;
+        setStatus('', 'Connection failed');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html>
-
