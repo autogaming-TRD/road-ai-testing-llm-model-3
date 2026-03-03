@@ -1,337 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Road Repair Cost Calculator</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:40px 20px}
-.container{max-width:680px;margin:0 auto}
-h1{text-align:center;font-size:1.85rem;font-weight:800;background:linear-gradient(135deg,#4ade80,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
-.subtitle{text-align:center;color:#64748b;margin-bottom:36px;font-size:.93rem}
-.banner{background:#0d1f12;border:1px solid rgba(74,222,128,.3);border-radius:14px;padding:20px 22px;margin-bottom:28px}
-.banner h3{color:#4ade80;font-size:.9rem;margin-bottom:6px}
-.banner p{font-size:.81rem;color:#94a3b8;line-height:1.6;margin-bottom:12px}
-.banner a{color:#4ade80;text-decoration:none}
-.free-badge{display:inline-block;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:#4ade80;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
-.key-row{display:flex;gap:10px;flex-wrap:wrap}
-.key-input{flex:1;min-width:180px;background:#0f172a;border:1.5px solid #334155;border-radius:9px;padding:10px 13px;color:#f8fafc;font-size:.88rem;outline:none;font-family:monospace;transition:border-color .2s}
-.key-input:focus{border-color:#4ade80}
-.key-btn{padding:10px 18px;background:#4ade80;border:none;border-radius:9px;color:#0f172a;font-weight:700;cursor:pointer;font-size:.86rem;white-space:nowrap}
-.key-btn:hover{background:#86efac}
-.key-status{font-size:.79rem;margin-top:8px;color:#f59e0b}
-.key-status.ok{color:#4ade80}
-.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:26px;margin-bottom:20px}
-.card-title{font-size:.9rem;font-weight:700;color:#f8fafc;margin-bottom:18px;display:flex;align-items:center;gap:10px}
-.snum{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
-.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.type-btn{background:#0f172a;border:2px solid #334155;border-radius:12px;padding:22px 14px;cursor:pointer;text-align:center;color:#94a3b8;transition:all .2s}
-.type-btn:hover{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.03)}
-.type-btn.active{border-color:#4ade80;background:rgba(74,222,128,.07);color:#f8fafc}
-.type-btn b{display:block;font-size:1.05rem;margin-bottom:6px;color:#f8fafc}
-.type-btn small{font-size:.74rem;color:#64748b;line-height:1.4;display:block}
-.type-btn.active small{color:#94a3b8}
-.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ig{display:flex;flex-direction:column;gap:7px}
-label{font-size:.83rem;font-weight:600;color:#94a3b8}
-input[type=number]{background:#0f172a;border:2px solid #334155;border-radius:10px;padding:11px 14px;color:#f8fafc;font-size:1rem;outline:none;transition:border-color .2s;width:100%}
-input[type=number]:focus{border-color:#4ade80}
-.unit{font-size:.74rem;color:#475569}
-.sub-btn{width:100%;padding:16px;background:linear-gradient(135deg,#4ade80,#3b82f6);border:none;border-radius:12px;color:#0f172a;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .2s,transform .1s}
-.sub-btn:hover{opacity:.9}
-.sub-btn:active{transform:scale(.99)}
-.sub-btn:disabled{opacity:.4;cursor:not-allowed}
-.result-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:26px;margin-top:22px;overflow:visible;height:auto}
-.result-box{background:#0f172a;border:2px solid #1e293b;border-radius:12px;padding:20px;font-size:.91rem;line-height:1.85;color:#94a3b8;white-space:pre-wrap;word-break:break-word;transition:border-color .35s;width:100%;display:block;overflow-wrap:break-word}
-.result-box.loading{border-color:#3b82f6}
-.result-box.done{border-color:#4ade80;color:#e2e8f0}
-.result-box.error{border-color:#ef4444;color:#fca5a5}
-.placeholder{color:#334155;font-style:italic}
-.spinner{display:inline-block;width:15px;height:15px;border:2px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:middle;margin-right:9px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.status-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#475569;margin-top:10px}
-.dot{width:7px;height:7px;border-radius:50%;background:#334155;flex-shrink:0}
-.dot.on{background:#4ade80;animation:pulse 1.6s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-@media(max-width:500px){.type-grid,.input-grid{grid-template-columns:1fr}h1{font-size:1.45rem}}
-</style>
+    <meta charset="UTF-8">
+    <title>Concrete Road Repair Cost Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            padding: 40px;
+        }
+
+        .container {
+            background: white;
+            max-width: 600px;
+            margin: auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 15px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .calculate-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .send-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .status {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+
 <div class="container">
+    <h2>Concrete Road Repair Calculator</h2>
 
-<h1>Road Repair Cost Calculator</h1>
-<p class="subtitle">AI-powered concrete road damage diagnosis and cost estimation</p>
+    <label>Damage Type</label>
+    <select id="damageType">
+        <option value="pothole">Pothole</option>
+        <option value="crack">Crack</option>
+    </select>
 
-<!-- API Key -->
-<div class="banner">
-  <h3>🔑 Google Gemini API Key <span class="free-badge">100% FREE</span></h3>
-  <p>
-    No credit card needed — just your Google account.<br>
-    Get your free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>
-    → Sign in → Click <strong>Create API key</strong> → Copy and paste it below.
-  </p>
-  <div class="key-row">
-    <input class="key-input" id="apiKey" type="password" placeholder="AIzaSy..." autocomplete="off"/>
-    <button class="key-btn" onclick="saveKey()">Save Key</button>
-  </div>
-  <div class="key-status" id="keyStatus">No API key entered yet</div>
-</div>
+    <label>Width (meters)</label>
+    <input type="number" id="width" placeholder="Enter width in meters">
 
-<!-- Step 1 -->
-<div class="card">
-  <div class="card-title">
-    <span class="snum" style="background:#1e3a5f;color:#60a5fa">1</span>
-    Select Damage Type
-  </div>
-  <div class="type-grid">
-    <button class="type-btn" id="btn-pothole" onclick="pick('pothole')">
-      <b>🕳️ Pothole</b>
-      <small>Cavity or depression in road surface caused by water and traffic load</small>
-    </button>
-    <button class="type-btn" id="btn-crack" onclick="pick('crack')">
-      <b>〰️ Crack</b>
-      <small>Linear fracture or fissure running through the concrete surface</small>
-    </button>
-  </div>
-</div>
+    <label>Length (meters)</label>
+    <input type="number" id="length" placeholder="Enter length in meters">
 
-<!-- Step 2 -->
-<div class="card">
-  <div class="card-title">
-    <span class="snum" style="background:#1a2e1a;color:#4ade80">2</span>
-    Damage Measurements
-  </div>
-  <div class="input-grid">
-    <div class="ig">
-      <label>Width</label>
-      <input type="number" id="width" placeholder="e.g. 0.5" min="0.01" step="0.01"/>
-      <span class="unit">meters (m)</span>
-    </div>
-    <div class="ig">
-      <label>Length</label>
-      <input type="number" id="length" placeholder="e.g. 3.0" min="0.01" step="0.01"/>
-      <span class="unit">meters (m)</span>
-    </div>
-  </div>
-</div>
+    <button class="calculate-btn" onclick="calculateCost()">Calculate Cost</button>
 
-<!-- Submit -->
-<button class="sub-btn" id="submitBtn" onclick="analyze()">⚡ Analyze Damage &amp; Calculate Cost</button>
+    <div class="result" id="costResult"></div>
 
-<!-- Result -->
-<div class="result-card">
-  <div class="card-title">
-    <span class="snum" style="background:#1e3a5f;color:#3b82f6">AI</span>
-    Diagnosis &amp; Cost Report
-  </div>
-  <div id="resultBox" style="background:#0f172a;border:2px solid #1e293b;border-radius:12px;padding:20px;font-size:.91rem;line-height:1.85;color:#94a3b8;word-break:break-word;transition:border-color .35s;width:100%;box-sizing:border-box;">
-    <span style="color:#334155;font-style:italic">Select a damage type, enter width and length, then click Analyze. The AI will generate a full repair report and cost estimate.</span>
-  </div>
-  <div class="status-row">
-    <div class="dot" id="dot"></div>
-    <span id="statusTxt">Ready</span>
-  </div>
-</div>
+    <label>LLM Generated Instructions</label>
+    <textarea id="llmText" placeholder="Your LLM will generate instructions + cost explanation here..."></textarea>
 
+    <button class="send-btn" onclick="sendToWebhook()">Send to Make.com</button>
+
+    <div class="status" id="statusMessage"></div>
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────
-// YOUR AI INSTRUCTIONS — users never see this.
-// When you have your real repair document, paste it here.
-// ─────────────────────────────────────────────────────────────
-var SYSTEM_PROMPT = `You are a professional concrete road repair engineer working in Chiang Mai, Thailand. When given a damage report you MUST follow the exact steps and cost formulas below. Always calculate real numbers — never skip the math.
 
-━━━ POTHOLE REPAIR — EXACT STEPS ━━━
-Step 1: Remove the damaged concrete around the pothole. Standard Chiang Mai road thickness is 0.15–0.20 m. Use 0.15 m as default height if not specified.
-Step 2: Wooden beams (6 inch thick, 4–8 inch wide, length = damage length):
-  - SKIP if area is very small (under 10×30 cm)
-  - REQUIRED if area is large (e.g. 2×5 m or bigger) — place 2 beams evenly across the hole
-Step 3: Fill with sand to 0.05–0.10 m height (use 0.05 m default). Pack tightly.
-Step 4: Wire mesh reinforcement:
-  - SKIP if area is very small (under 10×30 cm)
-  - REQUIRED if area is large (2×5 m or bigger)
-Step 5: Fill with pre-mix concrete to the top. Concrete fill height = road thickness minus sand height.
-Step 6: Draw grooves on surface if required.
+let calculatedCost = 0;
 
-━━━ CRACK REPAIR — EXACT STEPS ━━━
-Step 1: Cut the crack into a V-shape groove — not too deep, just enough to hold concrete.
-Step 2: Fill the V-groove completely with pre-mix concrete.
-Step 3: Draw grooves on surface if required.
+function calculateCost() {
+    const damageType = document.getElementById("damageType").value;
+    const width = parseFloat(document.getElementById("width").value);
+    const length = parseFloat(document.getElementById("length").value);
 
-━━━ MATERIAL QUANTITIES & COST FORMULAS ━━━
-
-Convert all measurements to centimeters before calculating.
-
-1. WOODEN BEAMS (pothole only, when required):
-   Quantity = 2 beams, each = damage length
-   Unit cost = 375–400 THB per meter
-   Cost = 2 × length(m) × 387.50 THB (use midpoint)
-
-2. SAND (pothole only):
-   Volume = width(cm) × length(cm) × sand fill height(cm)
-   Default sand fill height = 5 cm (0.05 m)
-   Unit cost = 0.0009595 THB per cm³
-   Cost = volume(cm³) × 0.0009595
-
-3. PRE-MIX CONCRETE:
-   For pothole: Volume = width(cm) × length(cm) × concrete fill height(cm)
-     concrete fill height = road thickness(cm) − sand height(cm) = 15 − 5 = 10 cm default
-   For crack: Volume = width(cm) × length(cm) × 5 cm (assume 5 cm deep V-groove)
-   Unit cost = 0.0014–0.0029 THB per cm³ (use 0.00215 midpoint)
-   Cost = volume(cm³) × 0.00215
-
-4. LABOR:
-   Small area (under 0.08×0.08 m): 1 worker, 1 day
-   Medium area (under 1×1 m): 1–2 workers, 1 day
-   Large area (1–5 m × 1–5 m): 3–5 workers, 1–2 days
-   Very large (over 5×5 m): 5–10 workers, 2–3 days
-   Cost per worker per day = 350–1,000 THB (use 675 THB midpoint)
-   Total labor cost = number of workers × days × 675 THB
-
-━━━ REQUIRED OUTPUT FORMAT ━━━
-You MUST always produce ALL of these sections with real calculated numbers:
-
-🔎 DAMAGE ASSESSMENT
-- Damage type, width, length, total area in m²
-- Severity level and reason
-- State if wooden beams and wire mesh are required or not
-
-🔧 STEP-BY-STEP REPAIR METHOD
-List every single repair step for this damage type with specific details (dimensions, materials, actions)
-
-📦 MATERIAL QUANTITIES NEEDED
-List every material with exact quantity:
-- Wooden beams: X beams × Y meters long (or N/A)
-- Sand: X cm³ = X m³ (or N/A)
-- Pre-mix concrete: X cm³ = X m³
-- Wire mesh: dimensions (or N/A)
-
-💰 ITEMIZED COST CALCULATION
-Show the math for every item:
-- Wooden beams: formula = result THB (or N/A)
-- Sand: formula = result THB (or N/A)
-- Pre-mix concrete: formula = result THB
-- Labor: X workers × Y days × 675 THB = result THB
-
-⏱ ESTIMATED COMPLETION TIME
-Realistic time based on damage size and number of workers
-
-⚠️ IMPORTANT NOTES
-Any risks, urgency, or follow-up maintenance needed
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-💵 TOTAL ESTIMATED COST: [low] – [high] THB
-(Prices based on Chiang Mai commercial rates / OBEC pricing)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
-// ─────────────────────────────────────────────────────────────
-
-var picked = null;
-
-window.onload = function() {
-  var k = sessionStorage.getItem('gemini_key');
-  if (k) {
-    document.getElementById('apiKey').value = k;
-    document.getElementById('keyStatus').textContent = 'API key loaded ✓';
-    document.getElementById('keyStatus').className = 'key-status ok';
-  }
-};
-
-function saveKey() {
-  var k = document.getElementById('apiKey').value.trim();
-  if (k.length < 10) {
-    document.getElementById('keyStatus').textContent = 'Key looks too short — paste the full key from Google AI Studio';
-    document.getElementById('keyStatus').className = 'key-status';
-    return;
-  }
-  sessionStorage.setItem('gemini_key', k);
-  document.getElementById('keyStatus').textContent = 'API key saved ✓';
-  document.getElementById('keyStatus').className = 'key-status ok';
-}
-
-function pick(type) {
-  picked = type;
-  document.querySelectorAll('.type-btn').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('btn-' + type).classList.add('active');
-}
-
-function setStatus(on, txt) {
-  document.getElementById('dot').className = 'dot' + (on ? ' on' : '');
-  document.getElementById('statusTxt').textContent = txt;
-}
-
-async function analyze() {
-  var key = document.getElementById('apiKey').value.trim();
-  var w   = parseFloat(document.getElementById('width').value);
-  var l   = parseFloat(document.getElementById('length').value);
-  var box = document.getElementById('resultBox');
-  var btn = document.getElementById('submitBtn');
-
-  if (!key || key.length < 10) { alert('Please enter and save your Gemini API key first.\nGet it free at aistudio.google.com/apikey'); return; }
-  if (!picked) { alert('Please select Pothole or Crack.'); return; }
-  if (!w || !l || w <= 0 || l <= 0) { alert('Please enter valid width and length values.'); return; }
-
-  var area    = (w * l).toFixed(2);
-  var dmgType = picked.charAt(0).toUpperCase() + picked.slice(1);
-  var userMsg = 'Road Damage Report:\n- Damage Type: ' + dmgType + '\n- Width: ' + w + ' m\n- Length: ' + l + ' m\n- Total Damaged Area: ' + area + ' m²\n\nPlease analyze this damage and provide the full repair report and cost estimate.';
-
-  btn.disabled = true;
-  box.style.borderColor = '#f59e0b'; box.style.color = '#94a3b8';
-  box.innerHTML = '<span class="spinner"></span>Analyzing damage — please wait...';
-  setStatus(true, 'Sending to Gemini AI...');
-
-  try {
-    // Merge system prompt + user message into one text (most compatible approach)
-    var fullPrompt = SYSTEM_PROMPT + '\n\n' + userMsg;
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key;
-
-    var resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          role: 'user',
-          parts: [{ text: fullPrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 2500
-        }
-      })
-    });
-
-    var data = await resp.json();
-
-    if (!resp.ok) {
-      var errMsg = data.error ? '(Code ' + data.error.code + ') ' + data.error.message : 'HTTP ' + resp.status;
-      throw new Error(errMsg);
+    if (!width || !length) {
+        alert("Please enter width and length");
+        return;
     }
 
-    var text = data.candidates &&
-               data.candidates[0] &&
-               data.candidates[0].content &&
-               data.candidates[0].content.parts &&
-               data.candidates[0].content.parts[0] &&
-               data.candidates[0].content.parts[0].text;
+    const area = width * length;
 
-    if (!text) throw new Error('Empty response from Gemini. Response: ' + JSON.stringify(data).slice(0,200));
+    let ratePerSqm = 0;
 
-    box.style.borderColor = '#22c55e';
-    box.style.color = '#e2e8f0';
-    // Convert newlines to <br> for full display
-    box.innerHTML = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-    setStatus(true, 'Analysis complete');
+    if (damageType === "pothole") {
+        ratePerSqm = 1500; // THB per sqm
+    } else if (damageType === "crack") {
+        ratePerSqm = 800; // THB per sqm
+    }
 
-  } catch (err) {
-    box.style.borderColor = '#ef4444';
-    box.style.color = '#fca5a5';
-    box.innerHTML = ('Error: ' + err.message + '\n\nTroubleshooting:\n• Go to aistudio.google.com/apikey and create a BRAND NEW key\n• Paste the new key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome\n• Make sure your internet connection is working').replace(/\n/g,'<br>');
-    setStatus(false, 'Error — see message above');
-  } finally {
-    btn.disabled = false;
-  }
+    calculatedCost = area * ratePerSqm;
+
+    document.getElementById("costResult").innerText =
+        "Estimated Cost: ฿" + calculatedCost.toLocaleString();
 }
+
+function sendToWebhook() {
+
+    const damageType = document.getElementById("damageType").value;
+    const width = document.getElementById("width").value;
+    const length = document.getElementById("length").value;
+    const llmText = document.getElementById("llmText").value;
+
+    fetch("https://hook.eu1.make.com/8hteq2btb47yhvhe4sx6jqxa3zcx3qcq", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            damage_type: damageType,
+            width: width,
+            length: length,
+            calculated_cost: calculatedCost,
+            llm_output: llmText
+        })
+    })
+    .then(response => {
+        if (response.ok) {
+            document.getElementById("statusMessage").innerText = "✅ Sent successfully to Make.com!";
+        } else {
+            document.getElementById("statusMessage").innerText = "❌ Error sending to webhook.";
+        }
+    })
+    .catch(error => {
+        document.getElementById("statusMessage").innerText = "❌ Network error.";
+    });
+}
+
 </script>
+
 </body>
 </html>
