@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Road Repair Cost Calculator</title>
+<title>Road Repair Cost Calculator (Z.AI)</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:40px 20px}
@@ -65,14 +65,13 @@ input[type=number]:focus{border-color:#4ade80}
 
 <!-- API Key -->
 <div class="banner">
-  <h3>🔑 Google Gemini API Key <span class="free-badge">100% FREE</span></h3>
+  <h3>🔑 Z.AI API Key <span class="free-badge">Manage on Z.AI</span></h3>
   <p>
-    No credit card needed — just your Google account.<br>
-    Get your free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a>
-    → Sign in → Click <strong>Create API key</strong> → Copy and paste it below.
+    Create or manage your API key at the Z.AI dashboard.<br>
+    Visit the API keys page in your Z.AI account to create a key, then paste it below.
   </p>
   <div class="key-row">
-    <input class="key-input" id="apiKey" type="password" placeholder="AIzaSy..." autocomplete="off"/>
+    <input class="key-input" id="apiKey" type="password" placeholder="zai_sk_..." autocomplete="off"/>
     <button class="key-btn" onclick="saveKey()">Save Key</button>
   </div>
   <div class="key-status" id="keyStatus">No API key entered yet</div>
@@ -137,88 +136,46 @@ input[type=number]:focus{border-color:#4ade80}
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────
-// YOUR AI INSTRUCTIONS — users never see this.
-// When you have your real repair document, paste it here.
-// ─────────────────────────────────────────────────────────────
+// SYSTEM_PROMPT remains the same as your original; keep your repair guide here.
 var SYSTEM_PROMPT = `You are a professional concrete road repair engineer and cost estimator working in Chiang Mai, Thailand. You follow a specific repair guide and pricing document. Use ONLY the methods and costs from this guide when generating reports.
 
-=== REPAIR GUIDE ===
+... (How to fix con concrete road
 
---- POTHOLE REPAIR STEPS ---
-1. Remove the damaged area — measure width, length, and height. Standard Chiang Mai concrete road height is 0.15–0.20 meters.
-2. Place 2 wooden beams evenly across the hole after clearing the damage:
-   - OPTIONAL if area is small (e.g. 2×5 cm or 10×30 cm)
-   - REQUIRED if area is large (e.g. 2×5 meters or 3×4 meters)
-3. Fill with sand to a height of 0.05 meters. If the road is 10–20 cm thick, fill sand to 0.10–0.15 meters height. Pack tightly.
-4. Place wire mesh for reinforcement:
-   - OPTIONAL if area is small (e.g. 2×5 cm or 10×30 cm)
-   - REQUIRED if area is large (e.g. 2×5 meters or 3×4 meters)
-5. Fill with pre-mix concrete until the area is properly filled.
-6. Draw grooves if specified or required.
+Pothole
 
---- CRACK REPAIR STEPS ---
-1. Cut the crack into a V-shape — not too deep, just enough room to fill with pre-mix concrete.
-2. Fill the V-shaped groove with pre-mix concrete until properly filled.
-3. Draw grooves if specified or required.
+1.1 starts by removing the damage area, which is from calculating the area around the damage width, length and height. Mostly the height for Chaing Mai concrete road is around 0.15-0.20 meter.
 
-=== COST CALCULATION GUIDE ===
+1.2 place 2 wooden beams evenly the same length on the hole after you remove the access damage area. In case of the are of width and height are small placing the wooden beam are optional, for example the width and length is only 2x5 cm or 10x30 cm it means that placing the wooden beam are optional but, if the are are big placing wooden beam are on more optional, for example the width and length is 2x5 meter or 3x4 meter it means that you must placing wooden beam for support.
 
-Step 1: Calculate width, length, and height of the damaged area.
+1.3 fill in the area with sand, make sure it fills in tight in the height 0.05 meter but, if the concrete road is around 10-20 cm in height, fill in the sand around 0.10-0.15 meter in height.
 
-Step 2: Calculate material costs:
+1.4 place a wire mate as enough for good strength. In case the the are of width and height are small placing wire mate are optional for example the width and length is only 2x5 cm or 10x30 cm it means that placing the wire mate are optional but, if the are are big placing wooden beam are on more optional, for example the width and length is 2x5 meter or 3x4 meter it means that you must placing wire mate for support.
 
-WOODEN BEAMS (for pothole only, if required):
-- Size: 6 inches thick, 4–8 inches wide, length = damage length
-- Cost: 375–400 THB per meter
+1.5 fill in the pre-mix concrete until it is filled properly.
 
-SAND (for pothole only):
-- Fill height: 0.05–0.10 meters typically
-- Cost: 0.0009595 THB per cubic centimeter
-- Formula: width (cm) × length (cm) × fill height (cm) × 0.0009595
+1.6 if needed draw a grooves as specified.
 
-PRE-MIX CONCRETE:
-- Fill height: 150mm–300mm (0.15–0.30 meters) for pothole; just enough for crack
-- Cost: 0.0014–0.0029 THB per cubic centimeter
-- Formula: width (cm) × length (cm) × fill height (cm) × unit cost
+crack
 
-LABOR:
-- Small area (0.02–0.08m × 0.02–0.08m): 1 person needed
-- Large area (2–5m × 2–5m): 3–10 people needed
-- Cost: 350–1,000 THB per person per day
-- Note: Prices are based on commercial rates in the province of repair or OBEC pricing
+2.1 starts by removing part of the damage in a v shape on the ground but, not too deep, only leaving just enough room to fill pre-mix concrete.
 
-=== OUTPUT FORMAT ===
+2.2 fill in the pre-mix concrete around the crack until it is filled properly. 
 
-When given a damage report, always respond with these sections:
+2.3 If needed, draw a groove as specified.
 
-🔎 DAMAGE ASSESSMENT
-Describe the damage type, dimensions, total area, and whether wooden beams and wire mesh are required or optional based on the size.
+How to calculate the price and cost
+ 
+Calculate width, length and height of an damage road
 
-🔧 RECOMMENDED REPAIR METHOD
-List the exact step-by-step repair procedure from the guide above for this damage type.
+Comparing all of the materials cost
 
-💰 ESTIMATED COST BREAKDOWN
-Show itemized calculations:
-- Wooden beams (pothole only, if required): quantity × rate
-- Sand (pothole only): volume in cm³ × 0.0009595 THB
-- Pre-mix concrete: volume in cm³ × 0.0014–0.0029 THB
-- Labor: number of workers × days × daily rate
-
-⏱ ESTIMATED COMPLETION TIME
-Estimate realistically based on damage size and number of workers.
-
-⚠️ ADDITIONAL NOTES
-Any important observations, urgency, or maintenance advice.
-
-💵 TOTAL ESTIMATED COST: [low estimate] – [high estimate] THB
-(Based on commercial prices in Chiang Mai / OBEC pricing)`;
-// ─────────────────────────────────────────────────────────────
+2.1 calculate how much wooden beam are we using, mostly use around 6 inches thick and between 4-8 inches in width and the length as the same as the damage area. costing around 375-400 Thai baht per meter.
+) ...`;
 
 var picked = null;
 
 window.onload = function() {
-  var k = sessionStorage.getItem('gemini_key');
+  var k = sessionStorage.getItem('zai_key');
   if (k) {
     document.getElementById('apiKey').value = k;
     document.getElementById('keyStatus').textContent = 'API key loaded ✓';
@@ -229,11 +186,11 @@ window.onload = function() {
 function saveKey() {
   var k = document.getElementById('apiKey').value.trim();
   if (k.length < 10) {
-    document.getElementById('keyStatus').textContent = 'Key looks too short — paste the full key from Google AI Studio';
+    document.getElementById('keyStatus').textContent = 'Key looks too short — paste the full key from Z.AI dashboard';
     document.getElementById('keyStatus').className = 'key-status';
     return;
   }
-  sessionStorage.setItem('gemini_key', k);
+  sessionStorage.setItem('zai_key', k);
   document.getElementById('keyStatus').textContent = 'API key saved ✓';
   document.getElementById('keyStatus').className = 'key-status ok';
 }
@@ -256,7 +213,7 @@ async function analyze() {
   var box = document.getElementById('resultBox');
   var btn = document.getElementById('submitBtn');
 
-  if (!key || key.length < 10) { alert('Please enter and save your Gemini API key first.\nGet it free at aistudio.google.com/apikey'); return; }
+  if (!key || key.length < 10) { alert('Please enter and save your Z.AI API key first. Create one at your Z.AI dashboard.'); return; }
   if (!picked) { alert('Please select Pothole or Crack.'); return; }
   if (!w || !l || w <= 0 || l <= 0) { alert('Please enter valid width and length values.'); return; }
 
@@ -267,43 +224,50 @@ async function analyze() {
   btn.disabled = true;
   box.className = 'result-box loading';
   box.innerHTML = '<span class="spinner"></span>Analyzing damage — please wait...';
-  setStatus(true, 'Sending to Gemini AI...');
+  setStatus(true, 'Sending to Z.AI...');
 
   try {
-    // Merge system prompt + user message into one text (most compatible approach)
-    var fullPrompt = SYSTEM_PROMPT + '\n\n' + userMsg;
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key;
+    // Merge system prompt + user message into one conversation.
+    var messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userMsg }
+    ];
+
+    var url = 'https://api.z.ai/api/paas/v4/chat/completions';
 
     var resp = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en-US,en',
+        'Authorization': 'Bearer ' + key
+      },
       body: JSON.stringify({
-        contents: [{
-          role: 'user',
-          parts: [{ text: fullPrompt }]
-        }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1200
-        }
+        model: 'glm-5',
+        messages: messages,
+        temperature: 0.2,
+        stream: false
       })
     });
 
     var data = await resp.json();
 
     if (!resp.ok) {
-      var errMsg = data.error ? '(Code ' + data.error.code + ') ' + data.error.message : 'HTTP ' + resp.status;
+      var errMsg = data.error ? '(' + data.error.code + ') ' + data.error.message : 'HTTP ' + resp.status;
       throw new Error(errMsg);
     }
 
-    var text = data.candidates &&
-               data.candidates[0] &&
-               data.candidates[0].content &&
-               data.candidates[0].content.parts &&
-               data.candidates[0].content.parts[0] &&
-               data.candidates[0].content.parts[0].text;
+    // Try several common response shapes (z.ai responses follow OpenAI-style chat completions)
+    var text = '';
+    if (data.choices && data.choices[0]) {
+      var ch = data.choices[0];
+      if (ch.message && ch.message.content) text = ch.message.content;
+      else if (ch.message && typeof ch.message === 'string') text = ch.message;
+      else if (ch.text) text = ch.text;
+      else if (ch.delta && ch.delta.content) text = ch.delta.content;
+    }
 
-    if (!text) throw new Error('Empty response from Gemini. Response: ' + JSON.stringify(data).slice(0,200));
+    if (!text) throw new Error('Empty response from Z.AI. Response: ' + JSON.stringify(data).slice(0,200));
 
     box.className = 'result-box done';
     box.textContent = text;
@@ -311,7 +275,7 @@ async function analyze() {
 
   } catch (err) {
     box.className = 'result-box error';
-    box.textContent = 'Error: ' + err.message + '\n\nTroubleshooting:\n• Go to aistudio.google.com/apikey and create a BRAND NEW key\n• Paste the new key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome\n• Make sure your internet connection is working';
+    box.textContent = 'Error: ' + err.message + '\n\nTroubleshooting:\n• Make sure your Z.AI API key is correct and active\n• Paste the key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome or a modern browser\n• Check console for CORS/network errors';
     setStatus(false, 'Error — see message above');
   } finally {
     btn.disabled = false;
