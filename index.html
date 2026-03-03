@@ -1,172 +1,130 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Concrete Road Repair Cost Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            padding: 40px;
-        }
-
-        .container {
-            background: white;
-            max-width: 600px;
-            margin: auto;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 15px;
-        }
-
-        select, input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        textarea {
-            height: 120px;
-            resize: vertical;
-        }
-
-        button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        .calculate-btn {
-            background: #007bff;
-            color: white;
-        }
-
-        .send-btn {
-            background: #28a745;
-            color: white;
-        }
-
-        .result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .status {
-            margin-top: 10px;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>Concrete Road Repair Calculator</h2>
-
-    <label>Damage Type</label>
-    <select id="damageType">
-        <option value="pothole">Pothole</option>
-        <option value="crack">Crack</option>
-    </select>
-
-    <label>Width (meters)</label>
-    <input type="number" id="width" placeholder="Enter width in meters">
-
-    <label>Length (meters)</label>
-    <input type="number" id="length" placeholder="Enter length in meters">
-
-    <button class="calculate-btn" onclick="calculateCost()">Calculate Cost</button>
-
-    <div class="result" id="costResult"></div>
-
-    <label>LLM Generated Instructions</label>
-    <textarea id="llmText" placeholder="Your LLM will generate instructions + cost explanation here..."></textarea>
-
-    <button class="send-btn" onclick="sendToWebhook()">Send to Make.com</button>
-
-    <div class="status" id="statusMessage"></div>
-</div>
-
 <script>
+// ─────────────────────────────────────────────
+// Z.AI VERSION
+// ─────────────────────────────────────────────
 
-let calculatedCost = 0;
+var SYSTEM_PROMPT = `You are a professional concrete road repair engineer and cost estimator working in Chiang Mai, Thailand. You follow a specific repair guide and pricing document. Use ONLY the methods and costs from this guide when generating reports.
 
-function calculateCost() {
-    const damageType = document.getElementById("damageType").value;
-    const width = parseFloat(document.getElementById("width").value);
-    const length = parseFloat(document.getElementById("length").value);
+=== REPAIR GUIDE ===
+--- POTHOLE REPAIR STEPS ---
+1. Remove the damaged area — measure width, length, and height. Standard Chiang Mai concrete road height is 0.15–0.20 meters.
+2. Place 2 wooden beams evenly across the hole after clearing the damage:
+   - OPTIONAL if area is small
+   - REQUIRED if area is large
+3. Fill with sand to a height of 0.05 meters.
+4. Place wire mesh for reinforcement.
+5. Fill with pre-mix concrete until filled.
+6. Draw grooves if required.
 
-    if (!width || !length) {
-        alert("Please enter width and length");
-        return;
-    }
+--- CRACK REPAIR STEPS ---
+1. Cut the crack into a V-shape.
+2. Fill with pre-mix concrete.
+3. Draw grooves if required.
 
-    const area = width * length;
+=== OUTPUT FORMAT ===
+Always follow the structured repair report format exactly.
+`;
 
-    let ratePerSqm = 0;
+var picked = null;
 
-    if (damageType === "pothole") {
-        ratePerSqm = 1500; // THB per sqm
-    } else if (damageType === "crack") {
-        ratePerSqm = 800; // THB per sqm
-    }
+window.onload = function() {
+  var k = sessionStorage.getItem('zai_key');
+  if (k) {
+    document.getElementById('apiKey').value = k;
+    document.getElementById('keyStatus').textContent = 'API key loaded ✓';
+    document.getElementById('keyStatus').className = 'key-status ok';
+  }
+};
 
-    calculatedCost = area * ratePerSqm;
-
-    document.getElementById("costResult").innerText =
-        "Estimated Cost: ฿" + calculatedCost.toLocaleString();
+function saveKey() {
+  var k = document.getElementById('apiKey').value.trim();
+  if (k.length < 10) {
+    document.getElementById('keyStatus').textContent = 'Key looks too short';
+    document.getElementById('keyStatus').className = 'key-status';
+    return;
+  }
+  sessionStorage.setItem('zai_key', k);
+  document.getElementById('keyStatus').textContent = 'API key saved ✓';
+  document.getElementById('keyStatus').className = 'key-status ok';
 }
 
-function sendToWebhook() {
+function pick(type) {
+  picked = type;
+  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + type).classList.add('active');
+}
 
-    const damageType = document.getElementById("damageType").value;
-    const width = document.getElementById("width").value;
-    const length = document.getElementById("length").value;
-    const llmText = document.getElementById("llmText").value;
+function setStatus(on, txt) {
+  document.getElementById('dot').className = 'dot' + (on ? ' on' : '');
+  document.getElementById('statusTxt').textContent = txt;
+}
 
-    fetch("https://hook.eu1.make.com/8hteq2btb47yhvhe4sx6jqxa3zcx3qcq", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            damage_type: damageType,
-            width: width,
-            length: length,
-            calculated_cost: calculatedCost,
-            llm_output: llmText
-        })
-    })
-    .then(response => {
-        if (response.ok) {
-            document.getElementById("statusMessage").innerText = "✅ Sent successfully to Make.com!";
-        } else {
-            document.getElementById("statusMessage").innerText = "❌ Error sending to webhook.";
-        }
-    })
-    .catch(error => {
-        document.getElementById("statusMessage").innerText = "❌ Network error.";
+async function analyze() {
+  var key = document.getElementById('apiKey').value.trim();
+  var w   = parseFloat(document.getElementById('width').value);
+  var l   = parseFloat(document.getElementById('length').value);
+  var box = document.getElementById('resultBox');
+  var btn = document.getElementById('submitBtn');
+
+  if (!key) { alert('Please enter your Z.AI API key first.'); return; }
+  if (!picked) { alert('Please select damage type.'); return; }
+  if (!w || !l) { alert('Enter valid width and length.'); return; }
+
+  var area = (w * l).toFixed(2);
+  var dmgType = picked.charAt(0).toUpperCase() + picked.slice(1);
+
+  var userMsg = `Road Damage Report:
+Damage Type: ${dmgType}
+Width: ${w} m
+Length: ${l} m
+Total Area: ${area} m²
+
+Please generate full repair report and cost estimation.`;
+
+  btn.disabled = true;
+  box.className = 'result-box loading';
+  box.innerHTML = '<span class="spinner"></span>Analyzing damage...';
+  setStatus(true, 'Sending to Z.AI...');
+
+  try {
+
+    var resp = await fetch("https://api.z.ai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + key
+      },
+      body: JSON.stringify({
+        model: "zai-chat",   // change if your dashboard shows different model
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMsg }
+        ],
+        temperature: 0.2,
+        max_tokens: 1200
+      })
     });
+
+    var data = await resp.json();
+
+    if (!resp.ok) {
+      throw new Error(data.error?.message || "Request failed");
+    }
+
+    var text = data.choices?.[0]?.message?.content;
+
+    if (!text) throw new Error("Empty response from Z.AI");
+
+    box.className = 'result-box done';
+    box.textContent = text;
+    setStatus(true, "Analysis complete ✓");
+
+  } catch (err) {
+    box.className = 'result-box error';
+    box.textContent = "Error: " + err.message;
+    setStatus(false, "Error occurred");
+  } finally {
+    btn.disabled = false;
+  }
 }
-
 </script>
-
-</body>
-</html>
