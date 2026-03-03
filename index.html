@@ -1,29 +1,176 @@
-<script>
-// ─────────────────────────────────────────────
-// Z.AI VERSION
-// ─────────────────────────────────────────────
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Road Repair Cost Calculator (Z.AI)</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:40px 20px}
+.container{max-width:680px;margin:0 auto}
+h1{text-align:center;font-size:1.85rem;font-weight:800;background:linear-gradient(135deg,#4ade80,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+.subtitle{text-align:center;color:#64748b;margin-bottom:36px;font-size:.93rem}
+.banner{background:#0d1f12;border:1px solid rgba(74,222,128,.3);border-radius:14px;padding:20px 22px;margin-bottom:28px}
+.banner h3{color:#4ade80;font-size:.9rem;margin-bottom:6px}
+.banner p{font-size:.81rem;color:#94a3b8;line-height:1.6;margin-bottom:12px}
+.banner a{color:#4ade80;text-decoration:none}
+.free-badge{display:inline-block;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.4);color:#4ade80;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.key-row{display:flex;gap:10px;flex-wrap:wrap}
+.key-input{flex:1;min-width:180px;background:#0f172a;border:1.5px solid #334155;border-radius:9px;padding:10px 13px;color:#f8fafc;font-size:.88rem;outline:none;font-family:monospace;transition:border-color .2s}
+.key-input:focus{border-color:#4ade80}
+.key-btn{padding:10px 18px;background:#4ade80;border:none;border-radius:9px;color:#0f172a;font-weight:700;cursor:pointer;font-size:.86rem;white-space:nowrap}
+.key-btn:hover{background:#86efac}
+.key-status{font-size:.79rem;margin-top:8px;color:#f59e0b}
+.key-status.ok{color:#4ade80}
+.card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:26px;margin-bottom:20px}
+.card-title{font-size:.9rem;font-weight:700;color:#f8fafc;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.snum{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;flex-shrink:0}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.type-btn{background:#0f172a;border:2px solid #334155;border-radius:12px;padding:22px 14px;cursor:pointer;text-align:center;color:#94a3b8;transition:all .2s}
+.type-btn:hover{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.03)}
+.type-btn.active{border-color:#4ade80;background:rgba(74,222,128,.07);color:#f8fafc}
+.type-btn b{display:block;font-size:1.05rem;margin-bottom:6px;color:#f8fafc}
+.type-btn small{font-size:.74rem;color:#64748b;line-height:1.4;display:block}
+.type-btn.active small{color:#94a3b8}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ig{display:flex;flex-direction:column;gap:7px}
+label{font-size:.83rem;font-weight:600;color:#94a3b8}
+input[type=number]{background:#0f172a;border:2px solid #334155;border-radius:10px;padding:11px 14px;color:#f8fafc;font-size:1rem;outline:none;transition:border-color .2s;width:100%}
+input[type=number]:focus{border-color:#4ade80}
+.unit{font-size:.74rem;color:#475569}
+.sub-btn{width:100%;padding:16px;background:linear-gradient(135deg,#4ade80,#3b82f6);border:none;border-radius:12px;color:#0f172a;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .2s,transform .1s}
+.sub-btn:hover{opacity:.9}
+.sub-btn:active{transform:scale(.99)}
+.sub-btn:disabled{opacity:.4;cursor:not-allowed}
+.result-card{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:26px;margin-top:22px}
+.result-box{background:#0f172a;border:2px solid #1e293b;border-radius:12px;padding:20px;min-height:170px;font-size:.91rem;line-height:1.85;color:#94a3b8;white-space:pre-wrap;word-break:break-word;transition:border-color .35s}
+.result-box.loading{border-color:#3b82f6}
+.result-box.done{border-color:#4ade80;color:#e2e8f0}
+.result-box.error{border-color:#ef4444;color:#fca5a5}
+.placeholder{color:#334155;font-style:italic}
+.spinner{display:inline-block;width:15px;height:15px;border:2px solid #3b82f6;border-top-color:transparent;border-radius:50%;animation:spin .75s linear infinite;vertical-align:middle;margin-right:9px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-row{display:flex;align-items:center;gap:8px;font-size:.78rem;color:#475569;margin-top:10px}
+.dot{width:7px;height:7px;border-radius:50%;background:#334155;flex-shrink:0}
+.dot.on{background:#4ade80;animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+@media(max-width:500px){.type-grid,.input-grid{grid-template-columns:1fr}h1{font-size:1.45rem}}
+</style>
+</head>
+<body>
+<div class="container">
 
+<h1>Road Repair Cost Calculator</h1>
+<p class="subtitle">AI-powered concrete road damage diagnosis and cost estimation</p>
+
+<!-- API Key -->
+<div class="banner">
+  <h3>🔑 Z.AI API Key <span class="free-badge">Manage on Z.AI</span></h3>
+  <p>
+    Create or manage your API key at the Z.AI dashboard.<br>
+    Visit the API keys page in your Z.AI account to create a key, then paste it below.
+  </p>
+  <div class="key-row">
+    <input class="key-input" id="apiKey" type="password" placeholder="zai_sk_..." autocomplete="off"/>
+    <button class="key-btn" onclick="saveKey()">Save Key</button>
+  </div>
+  <div class="key-status" id="keyStatus">No API key entered yet</div>
+</div>
+
+<!-- Step 1 -->
+<div class="card">
+  <div class="card-title">
+    <span class="snum" style="background:#1e3a5f;color:#60a5fa">1</span>
+    Select Damage Type
+  </div>
+  <div class="type-grid">
+    <button class="type-btn" id="btn-pothole" onclick="pick('pothole')">
+      <b>🕳️ Pothole</b>
+      <small>Cavity or depression in road surface caused by water and traffic load</small>
+    </button>
+    <button class="type-btn" id="btn-crack" onclick="pick('crack')">
+      <b>〰️ Crack</b>
+      <small>Linear fracture or fissure running through the concrete surface</small>
+    </button>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="card">
+  <div class="card-title">
+    <span class="snum" style="background:#1a2e1a;color:#4ade80">2</span>
+    Damage Measurements
+  </div>
+  <div class="input-grid">
+    <div class="ig">
+      <label>Width</label>
+      <input type="number" id="width" placeholder="e.g. 0.5" min="0.01" step="0.01"/>
+      <span class="unit">meters (m)</span>
+    </div>
+    <div class="ig">
+      <label>Length</label>
+      <input type="number" id="length" placeholder="e.g. 3.0" min="0.01" step="0.01"/>
+      <span class="unit">meters (m)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Submit -->
+<button class="sub-btn" id="submitBtn" onclick="analyze()">⚡ Analyze Damage &amp; Calculate Cost</button>
+
+<!-- Result -->
+<div class="result-card">
+  <div class="card-title">
+    <span class="snum" style="background:#1e3a5f;color:#3b82f6">AI</span>
+    Diagnosis &amp; Cost Report
+  </div>
+  <div class="result-box" id="resultBox">
+    <span class="placeholder">Select a damage type, enter width and length, then click Analyze. The AI will generate a full repair report and cost estimate.</span>
+  </div>
+  <div class="status-row">
+    <div class="dot" id="dot"></div>
+    <span id="statusTxt">Ready</span>
+  </div>
+</div>
+
+</div>
+
+<script>
+// SYSTEM_PROMPT remains the same as your original; keep your repair guide here.
 var SYSTEM_PROMPT = `You are a professional concrete road repair engineer and cost estimator working in Chiang Mai, Thailand. You follow a specific repair guide and pricing document. Use ONLY the methods and costs from this guide when generating reports.
 
-=== REPAIR GUIDE ===
---- POTHOLE REPAIR STEPS ---
-1. Remove the damaged area — measure width, length, and height. Standard Chiang Mai concrete road height is 0.15–0.20 meters.
-2. Place 2 wooden beams evenly across the hole after clearing the damage:
-   - OPTIONAL if area is small
-   - REQUIRED if area is large
-3. Fill with sand to a height of 0.05 meters.
-4. Place wire mesh for reinforcement.
-5. Fill with pre-mix concrete until filled.
-6. Draw grooves if required.
+... (How to fix con concrete road
 
---- CRACK REPAIR STEPS ---
-1. Cut the crack into a V-shape.
-2. Fill with pre-mix concrete.
-3. Draw grooves if required.
+Pothole
 
-=== OUTPUT FORMAT ===
-Always follow the structured repair report format exactly.
-`;
+1.1 starts by removing the damage area, which is from calculating the area around the damage width, length and height. Mostly the height for Chaing Mai concrete road is around 0.15-0.20 meter.
+
+1.2 place 2 wooden beams evenly the same length on the hole after you remove the access damage area. In case of the are of width and height are small placing the wooden beam are optional, for example the width and length is only 2x5 cm or 10x30 cm it means that placing the wooden beam are optional but, if the are are big placing wooden beam are on more optional, for example the width and length is 2x5 meter or 3x4 meter it means that you must placing wooden beam for support.
+
+1.3 fill in the area with sand, make sure it fills in tight in the height 0.05 meter but, if the concrete road is around 10-20 cm in height, fill in the sand around 0.10-0.15 meter in height.
+
+1.4 place a wire mate as enough for good strength. In case the the are of width and height are small placing wire mate are optional for example the width and length is only 2x5 cm or 10x30 cm it means that placing the wire mate are optional but, if the are are big placing wooden beam are on more optional, for example the width and length is 2x5 meter or 3x4 meter it means that you must placing wire mate for support.
+
+1.5 fill in the pre-mix concrete until it is filled properly.
+
+1.6 if needed draw a grooves as specified.
+
+crack
+
+2.1 starts by removing part of the damage in a v shape on the ground but, not too deep, only leaving just enough room to fill pre-mix concrete.
+
+2.2 fill in the pre-mix concrete around the crack until it is filled properly. 
+
+2.3 If needed, draw a groove as specified.
+
+How to calculate the price and cost
+ 
+Calculate width, length and height of an damage road
+
+Comparing all of the materials cost
+
+2.1 calculate how much wooden beam are we using, mostly use around 6 inches thick and between 4-8 inches in width and the length as the same as the damage area. costing around 375-400 Thai baht per meter.
+) ...`;
 
 var picked = null;
 
@@ -39,7 +186,7 @@ window.onload = function() {
 function saveKey() {
   var k = document.getElementById('apiKey').value.trim();
   if (k.length < 10) {
-    document.getElementById('keyStatus').textContent = 'Key looks too short';
+    document.getElementById('keyStatus').textContent = 'Key looks too short — paste the full key from Z.AI dashboard';
     document.getElementById('keyStatus').className = 'key-status';
     return;
   }
@@ -50,7 +197,7 @@ function saveKey() {
 
 function pick(type) {
   picked = type;
-  document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.type-btn').forEach(function(b){ b.classList.remove('active'); });
   document.getElementById('btn-' + type).classList.add('active');
 }
 
@@ -66,65 +213,74 @@ async function analyze() {
   var box = document.getElementById('resultBox');
   var btn = document.getElementById('submitBtn');
 
-  if (!key) { alert('Please enter your Z.AI API key first.'); return; }
-  if (!picked) { alert('Please select damage type.'); return; }
-  if (!w || !l) { alert('Enter valid width and length.'); return; }
+  if (!key || key.length < 10) { alert('Please enter and save your Z.AI API key first. Create one at your Z.AI dashboard.'); return; }
+  if (!picked) { alert('Please select Pothole or Crack.'); return; }
+  if (!w || !l || w <= 0 || l <= 0) { alert('Please enter valid width and length values.'); return; }
 
-  var area = (w * l).toFixed(2);
+  var area    = (w * l).toFixed(2);
   var dmgType = picked.charAt(0).toUpperCase() + picked.slice(1);
-
-  var userMsg = `Road Damage Report:
-Damage Type: ${dmgType}
-Width: ${w} m
-Length: ${l} m
-Total Area: ${area} m²
-
-Please generate full repair report and cost estimation.`;
+  var userMsg = 'Road Damage Report:\n- Damage Type: ' + dmgType + '\n- Width: ' + w + ' m\n- Length: ' + l + ' m\n- Total Damaged Area: ' + area + ' m²\n\nPlease analyze this damage and provide the full repair report and cost estimate.';
 
   btn.disabled = true;
   box.className = 'result-box loading';
-  box.innerHTML = '<span class="spinner"></span>Analyzing damage...';
+  box.innerHTML = '<span class="spinner"></span>Analyzing damage — please wait...';
   setStatus(true, 'Sending to Z.AI...');
 
   try {
+    // Merge system prompt + user message into one conversation.
+    var messages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: userMsg }
+    ];
 
-    var resp = await fetch("https://api.z.ai/v1/chat/completions", {
-      method: "POST",
+    var url = 'https://api.z.ai/api/paas/v4/chat/completions';
+
+    var resp = await fetch(url, {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + key
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en-US,en',
+        'Authorization': 'Bearer ' + key
       },
       body: JSON.stringify({
-        model: "zai-chat",   // change if your dashboard shows different model
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMsg }
-        ],
+        model: 'glm-5',
+        messages: messages,
         temperature: 0.2,
-        max_tokens: 1200
+        stream: false
       })
     });
 
     var data = await resp.json();
 
     if (!resp.ok) {
-      throw new Error(data.error?.message || "Request failed");
+      var errMsg = data.error ? '(' + data.error.code + ') ' + data.error.message : 'HTTP ' + resp.status;
+      throw new Error(errMsg);
     }
 
-    var text = data.choices?.[0]?.message?.content;
+    // Try several common response shapes (z.ai responses follow OpenAI-style chat completions)
+    var text = '';
+    if (data.choices && data.choices[0]) {
+      var ch = data.choices[0];
+      if (ch.message && ch.message.content) text = ch.message.content;
+      else if (ch.message && typeof ch.message === 'string') text = ch.message;
+      else if (ch.text) text = ch.text;
+      else if (ch.delta && ch.delta.content) text = ch.delta.content;
+    }
 
-    if (!text) throw new Error("Empty response from Z.AI");
+    if (!text) throw new Error('Empty response from Z.AI. Response: ' + JSON.stringify(data).slice(0,200));
 
     box.className = 'result-box done';
     box.textContent = text;
-    setStatus(true, "Analysis complete ✓");
+    setStatus(true, 'Analysis complete');
 
   } catch (err) {
     box.className = 'result-box error';
-    box.textContent = "Error: " + err.message;
-    setStatus(false, "Error occurred");
+    box.textContent = 'Error: ' + err.message + '\n\nTroubleshooting:\n• Make sure your Z.AI API key is correct and active\n• Paste the key, click Save Key (must turn green), then try again\n• Try opening the page in Chrome or a modern browser\n• Check console for CORS/network errors';
+    setStatus(false, 'Error — see message above');
   } finally {
     btn.disabled = false;
   }
 }
 </script>
+</body>
+</html>
